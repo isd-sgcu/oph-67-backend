@@ -42,6 +42,11 @@ docker-compose up -d
 make server  # Normal mode
 ```
 
+**Re-create doc**
+```bash
+swag init -g cmd/main.go  # Normal mode
+```
+
 ---
 
 ## API Documentation
