@@ -1,8 +1,5 @@
-Here’s the updated `README.md` file with the new fields (`Age`, `ChronicDisease`, and `DrugAllergy`) added to the `User` struct documentation. I've also ensured that the API endpoint descriptions and examples reflect these changes.
 
----
-
-# OPH-2025 Backend #Not Update Yet
+# OPH-2025 Backend
 
 ## Stack
 - **Go** (Golang)
@@ -11,352 +8,229 @@ Here’s the updated `README.md` file with the new fields (`Age`, `ChronicDiseas
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
 ### Prerequisites
-
 - Go 1.22 or later
 - Docker
 - Makefile
-- **Air** (optional for auto-reload)
 
-### Installing
-
+### Installation
 1. **Clone the repository:**
-
    ```bash
    git clone https://github.com/isd-sgcu/cutu2025-backend.git
    cd cutu2025-backend
    ```
 
-2. **Copy the environment configuration file:**
-
+2. **Setup environment:**
    ```bash
    cp .env.example .env
+   # Edit .env file with your configurations
    ```
 
-   Fill in the values in the `.env` file for your local environment.
-
-3. **Download dependencies:**
-
+3. **Install dependencies:**
    ```bash
    go mod download
    ```
 
-### Running the Project
-
-#### Database
-
-To start the local database for development, run:
-
+### Running
+**Start Database:**
 ```bash
 docker-compose up -d
 ```
 
-This will launch the PostgreSQL database in a Docker container.
-
-#### Server
-
-Option 1: **Standard Mode**
-
-To run the server normally:
-
+**Run Server:**
 ```bash
-make server
+make server  # Normal mode
 ```
 
-Option 2: **Development Mode (with auto-reload)**
+---
 
-To run the server in development mode with live auto-reload, use **Air** (a Go live reloading tool):
+## API Documentation
 
-```bash
-air -c .air.toml
+### User Management
+
+#### 1. Register New User *Need Implementation*
+**Endpoint:** `POST /api/users/register`  
+**Request Format (multipart/form-data):**
+```
+name: string
+phone: string (format: 0812345678)
+province: string
+school: string
+firstInterest: string
+secondInterest: string
+thirdInterest: string
+other...
 ```
 
-This option will automatically reload the server when you change any Go files.
-
----
-
-## API Endpoints
-
-### 1. **Get All Users**
-**Endpoint:** `/api/users`  
-**Method:** `GET`  
-**Permission:** BearerAuth (Staff, Admin)
-
-Retrieve a list of all users.
-
-**Response:**
-- `200 OK`: Returns a list of users.
-- `500 Internal Server Error`: Failed to fetch users.
-
----
-
-### 2. **Update Account Info**
-**Endpoint:** `/api/users`  
-**Method:** `PATCH`  
-**Permission:** BearerAuth
-
-Update that staff member's personal information.
-
-**Parameters:**
-- `user` (body) - User data (JSON).
-
-**Response:**
-- `204 No Content`: User successfully updated.
-- `400 Bad Request`: Invalid input.
-- `401 Unauthorized`: Unauthorized.
-- `403 Forbidden`: Forbidden.
-- `404 Not Found`: User not found.
-- `500 Internal Server Error`: Failed to update user.
-
----
-
-### 3. **Add Staff by Phone**
-**Endpoint:** `/api/users/addstaff/{phone}`  
-**Method:** `PATCH`  
-**Permission:** BearerAuth (Admin)
-
-Add a staff member by their phone number.
-
-**Parameters:**
-- `phone` (path) - The phone number of the user.
-
-**Response:**
-- `204 No Content`: Staff added successfully.
-- `400 Bad Request`: User is already a staff.
-- `500 Internal Server Error`: Failed to add staff.
-
----
-
-### 4. **Get User by ID**
-**Endpoint:** `/api/users/{id}`  
-**Method:** `GET`  
-**Permission:** BearerAuth
-
-Retrieve a user by its ID.
-
-**Parameters:**
-- `id` (path) - The ID of the user.
-
-**Response:**
-- `200 OK`: Returns the user details.
-- `404 Not Found`: User not found.
-- `500 Internal Server Error`: Failed to fetch user.
-
----
-
-### 5. **Update User by ID**
-**Endpoint:** `/api/users/{id}`  
-**Method:** `PATCH`  
-**Permission:** BearerAuth
-
-Update a user by its ID.
-
-**Parameters:**
-- `id` (path) - The ID of the user.
-- `user` (body) - User data (JSON).
-
-**Response:**
-- `204 No Content`: User successfully updated.
-- `400 Bad Request`: Invalid input.
-- `401 Unauthorized`: Unauthorized.
-- `403 Forbidden`: Forbidden.
-- `404 Not Found`: User not found.
-- `500 Internal Server Error`: Failed to update user.
-
----
-
-### 6. **Delete User by ID**
-**Endpoint:** `/api/users/{id}`  
-**Method:** `DELETE`  
-**Permission:** BearerAuth (Admin)
-
-Delete a user by its ID.
-
-**Parameters:**
-- `id` (path) - The ID of the user.
-
-**Response:**
-- `204 No Content`: User successfully deleted.
-- `401 Unauthorized`: Unauthorized.
-- `403 Forbidden`: Forbidden.
-- `404 Not Found`: User not found.
-- `500 Internal Server Error`: Failed to delete user.
-
----
-
-### 7. **Get QR Code URL for User**
-**Endpoint:** `/api/users/qr/{id}`  
-**Method:** `GET`  
-**Permission:** BearerAuth
-
-Retrieve a QR code URL for a user.
-
-**Parameters:**
-- `id` (path) - The ID of the user.
-
-**Response:**
-- `200 OK`: Returns the QR code URL.
-- `404 Not Found`: User not found.
-- `500 Internal Server Error`: Failed to fetch user.
-
----
-
-### 8. **Scan QR Code**
-**Endpoint:** `/api/users/qr/{id}`  
-**Method:** `POST`  
-**Permission:** BearerAuth (Staff, Admin)
-
-Scan a QR code and perform associated actions.
-
-**Parameters:**
-- `id` (path) - The ID of the user.
-
-**Response:**
-- `200 OK`: User scanned successfully with User data including last
-- `400 Bad Request`: User has already entered with last enter time.
-```
-{
-    "error": "User has already entered",
-    "message": "2025-01-26 18:39:15.10983 +0700 +07"
-}
-```
-- `500 Internal Server Error`: Failed to fetch user.
-
----
-
-### 9. **Register a New User**
-**Endpoint:** `/api/users/register`  
-**Method:** `POST`  
-**Permission:** No
-
-Register a new user in the system.
-
-**Parameters (form data):**
-- `id` (string) - User ID
-- `name` (string) - User Name
-- `email` (string) - User Email
-- `phone` (string) - User Phone
-- `university` (string) - User University
-- `sizeJersey` (string) - Jersey Size
-- `foodLimitation` (string) - Food Limitation
-- `invitationCode` (string) - Invitation Code
-- `status` (string) - User Status (`chula_student`, `alumni`, `general_public`, `general_student`)
-- `image` (file) - User Image
-- `age` (string) - User Age
-- `chronicDisease` (string) - Chronic Disease
-- `drugAllergy` (string) - Drug Allergy
-- `graduatedYear` (string) - Graduated Year
-- `faculty` (string) - Faculty
-- `education` (string) - User Education (`studying`, `graduated`)
-- 'isAcrophobia' (bool) - Is User acrophobia (`true`, `false`)
-
-**Response:**
-- `201 Created`: User successfully created.
-- `400 Bad Request`: Invalid input.
-- `401 Unauthorized`: Unauthorized.
-- `500 Internal Server Error`: Failed to create user.
-
----
-
-### 10. **Update User Role by ID**
-**Endpoint:** `/api/users/role/{id}`  
-**Method:** `PATCH`  
-**Permission:** BearerAuth (Admin)
-
-Update a user role by its ID.
-
-**Parameters:**
-- `id` (path) - The ID of the user.
-- `role` (body) - User role (string).
-
-**Response:**
-- `204 No Content`: User role updated successfully.
-- `400 Bad Request`: Invalid input.
-- `401 Unauthorized`: Unauthorized.
-- `403 Forbidden`: Forbidden.
-- `404 Not Found`: User not found.
-- `500 Internal Server Error`: Failed to update user role.
-
----
-
-### 11. **SignIn**
-**Endpoint:** `/api/users/signin`  
-**Method:** `POST`  
-**Permission:** No
-
-Authenticate a user and return an access token.
-
-**Parameters:**
-- `id` (body) - User ID.
-
-**Response:**
-- `200 OK`: Returns an access token.
-- `400 Bad Request`: Invalid input.
-- `401 Unauthorized`: Unauthorized.
-- `500 Internal Server Error`: Failed to sign in.
-
----
-
-## Error Responses
-
-### Error Response Format
+**Success Response (201):**
 ```json
 {
-  "error": "Error message here"
+  "accessToken": "string",
+  "userId": "string"
 }
 ```
 
-### Common Error Codes
-- `400 Bad Request`: Invalid input.
-- `401 Unauthorized`: Unauthorized access.
-- `403 Forbidden`: Forbidden action.
-- `404 Not Found`: Resource not found.
-- `500 Internal Server Error`: An error occurred on the server.
+#### 2. Get All Users
+**Endpoint:** `GET /api/users`  
+**Permissions:** Bearer Token (Staff/Admin)  
+**Query Parameters:**
+- `name`: Filter by name
+
+**Success Response (200):**
+```json
+[
+  {
+    "id": "string",
+    "name": "string",
+    "phone": "+66812345678",
+    "province": "Bangkok",
+    "school": "Chulalongkorn University"
+  }
+]
+```
+
+#### 3. Get User by ID
+**Endpoint:** `GET /api/users/{id}`  
+**Permissions:** Bearer Token
+
+**Success Response (200):**
+```json
+{
+  "id": "string",
+  "uid": "string",
+  "name": "string",
+  "phone": "+66812345678",
+  "province": "Bangkok",
+  "school": "Chulalongkorn University",
+  "firstInterest": "Technology",
+  "secondInterest": "Design",
+  "thirdInterest": "Business"
+}
+```
+
+#### 4. Update User
+**Endpoint:** `PATCH /api/users/{id}`  
+**Permissions:** Bearer Token  
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "birthDate": "2000-01-01T00:00:00Z",
+  "school": "New University"
+}
+```
+
+**Success Response:** 204 No Content
 
 ---
 
-## Definitions
+### QR Code Management
 
-### **Education Enum**
-- `studying`: The user is currently studying.
-- `graduated`: The user has graduated.
+#### 5. Scan QR Code
+**Endpoint:** `POST /api/users/qr/{id}`  
+**Permissions:** Bearer Token (Staff/Admin)
 
-### **Role Enum**
-- `member`: A member user.
-- `staff`: A staff user.
-- `admin`: An admin user.
+**Success Response (200):**
+```json
+{
+  "id": "string",
+  "name": "string",
+  "lastEntered": "2024-01-01T12:00:00Z"
+}
+```
 
-### **Status Enum**
-- `chula_student`: The user is a Chula student.
-- `alumni`: The user is an alumni.
-- `general_public`: The user is from the general public.
-- `general_student`: The user is a general student.
+**Error Response (400):**
+```json
+{
+  "error": "User has already entered",
+  "message": "2024-01-01 12:00:00 +0000 UTC"
+}
+```
 
-### **TokenResponse**
-- `accessToken`: The access token for authentication.
-- `userId`: The user ID associated with the token.
+---
 
-### **User**
-A user object containing:
-- `id`: The user liff ID.
-- `uid`: The user UID
-- `name`: The user name.
-- `email`: The user email.
-- `phone`: The user phone number.
-- `status`: The user's status.
-- `role`: The user's role.
-- `education`: The user's education status.
-- `imageUrl`: The user's profile image URL.
-- `faculty`: The user's faculty.
-- `foodLimitation`: The user's food limitations.
-- `graduatedYear`: The year the user graduated.
-- `invitationCode`: The user's invitation code.
-- `lastEntered`: Timestamp for the last QR scan.
-- `sizeJersey`: The user's jersey size.
-- `university`: The user's university.
-- `age`: The user's age.
-- `chronicDisease`: The user's chronic disease information.
-- `drugAllergy`: The user's drug allergy information.
-- `isAcrophobia`: Check if user is acrophobia (bool).
+### Admin Operations
+
+#### 6. Add Staff Member
+**Endpoint:** `PATCH /api/users/addstaff/{phone}`  
+**Permissions:** Bearer Token (Admin)
+
+**Success Response:** 204 No Content
+
+---
+
+## Data Structures
+
+### User Model
+```go
+type User struct {
+    ID              string     `json:"id"`
+    UID             string     `json:"uid"`
+    Name            string     `json:"name"`
+    Email           *string    `json:"email"`
+    Phone           string     `json:"phone"`
+    BirthDate       *time.Time `json:"birthDate"`
+    Role            Role       `json:"role"`
+    Province        string     `json:"province"`
+    School          string     `json:"school"`
+    SelectedSources []string   `json:"selectedSources"`
+    OtherSource     *string    `json:"otherSource"`
+    FirstInterest   string     `json:"firstInterest"`
+    SecondInterest  string     `json:"secondInterest"`
+    ThirdInterest   string     `json:"thirdInterest"`
+    Objective       string     `json:"objective"`
+    RegisteredAt    *time.Time `json:"registerAt"`
+    LastEntered     *time.Time `json:"lastEntered"`
+}
+```
+
+### Enumerations
+**User Roles:**
+```go
+type Role string
+const (
+    Member Role = "member"
+    Staff  Role = "staff"
+    Admin  Role = "admin"
+)
+```
+
+---
+
+## Error Handling
+
+### Common Responses
+**400 Bad Request:**
+```json
+{
+  "error": "Invalid phone number format"
+}
+```
+
+**401 Unauthorized:**
+```json
+{
+  "error": "Missing or invalid token"
+}
+```
+
+**403 Forbidden:**
+```json
+{
+  "error": "Insufficient permissions"
+}
+```
+
+**404 Not Found:**
+```json
+{
+  "error": "User not found"
+}
+```
+
+**500 Internal Server Error:**
+```json
+{
+  "error": "Database connection failed"
+}
+```
