@@ -8,42 +8,39 @@ import (
 	"github.com/isd-sgcu/oph-67-backend/usecase"
 )
 
+// RegisterUserRoutes sets up all user-related endpoints with appropriate middleware and grouping
 func RegisterUserRoutes(app *fiber.App, userUsecase *usecase.UserUsecase) {
 	userHandler := handler.NewUserHandler(userUsecase)
 
 	api := app.Group("/api/users")
 
-	api.Post("/signin", userHandler.SignIn)
+	// Public routes - No authentication required
+	{
+		api.Post("/signin", userHandler.SignIn)     // User authentication
+		api.Post("/register", userHandler.Register) // New user registration
+	}
 
-	api.Get("/",
-		middleware.RoleMiddleware(
-			userUsecase,
-			domain.Staff,
-			domain.Admin,
-		),
-		userHandler.GetAll)
+	// Authenticated user routes - Requires valid JWT
+	authenticated := api.Group("", middleware.AuthMiddleware(userUsecase))
+	{
+		authenticated.Get("/:id", userHandler.GetById)            // Get user by ID (self)
+		authenticated.Patch("/", userHandler.UpdateMyAccountInfo) // Update own account info
+		authenticated.Get("/qr/:id", userHandler.GetQRURL)        // Get user's QR code URL
+	}
 
-	api.Get("/:id", middleware.AuthMiddleware(userUsecase), userHandler.GetById)
+	// Staff/Admin routes - Requires Staff or Admin role
+	staffAdmin := api.Group("", middleware.RoleMiddleware(userUsecase, domain.Staff, domain.Admin))
+	{
+		staffAdmin.Get("/", userHandler.GetAll)        // List all users
+		staffAdmin.Post("/qr/:id", userHandler.ScanQR) // Scan user QR code
+	}
 
-	api.Post("/qr/:id", middleware.RoleMiddleware(
-		userUsecase,
-		domain.Staff,
-		domain.Admin,
-	),
-		userHandler.ScanQR)
-
-	api.Get("/qr/:id", middleware.AuthMiddleware(userUsecase), userHandler.GetQRURL)
-
-	api.Post("/register", userHandler.Register)
-
-	api.Patch("/:id", middleware.RoleMiddleware(
-		userUsecase,
-		domain.Admin,
-	),
-		userHandler.Update)
-
-	api.Patch("/", middleware.AuthMiddleware(userUsecase), userHandler.UpdateMyAccountInfo)
-	api.Patch("/addstaff/:phone", middleware.RoleMiddleware(userUsecase, domain.Admin), userHandler.AddStaff)
-	api.Delete("/:id", middleware.RoleMiddleware(userUsecase, domain.Admin), userHandler.Delete)
-	api.Patch("/role/:id", middleware.RoleMiddleware(userUsecase, domain.Admin), userHandler.UpdateRole)
+	// Admin-only routes - Requires Admin role
+	admin := api.Group("", middleware.RoleMiddleware(userUsecase, domain.Admin))
+	{
+		admin.Patch("/:id", userHandler.Update)               // Update any user account
+		admin.Delete("/:id", userHandler.Delete)              // Delete user
+		admin.Patch("/role/:id", userHandler.UpdateRole)      // Update user role
+		admin.Patch("/addstaff/:phone", userHandler.AddStaff) // Promote user to Staff by phone
+	}
 }

@@ -323,15 +323,14 @@ paths:
   /api/users/register:
     post:
       consumes:
-      - application/json
+      - multipart/form-data
       description: Register a new user in the system
       parameters:
-      - description: User data
-        in: body
-        name: user
+      - description: Username
+        in: formData
+        name: username
         required: true
-        schema:
-          $ref: '#/definitions/domain.User'
+        type: string
       produces:
       - application/json
       responses:
