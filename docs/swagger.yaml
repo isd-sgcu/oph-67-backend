@@ -49,6 +49,9 @@ definitions:
         type: string
       otherSource:
         type: string
+      otherStatus:
+        description: other status
+        type: string
       phone:
         description: Make phone unique
         type: string
@@ -66,6 +69,9 @@ definitions:
         items:
           type: string
         type: array
+      status:
+        description: ม.ต้น, ม.ปลาย, ปวช., ปวส. etc.
+        type: string
       thirdInterest:
         type: string
       uid:

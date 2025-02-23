@@ -645,6 +645,10 @@ const docTemplate = `{
                 "otherSource": {
                     "type": "string"
                 },
+                "otherStatus": {
+                    "description": "other status",
+                    "type": "string"
+                },
                 "phone": {
                     "description": "Make phone unique",
                     "type": "string"
@@ -669,6 +673,10 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "status": {
+                    "description": "ม.ต้น, ม.ปลาย, ปวช., ปวส. etc.",
+                    "type": "string"
                 },
                 "thirdInterest": {
                     "type": "string"
