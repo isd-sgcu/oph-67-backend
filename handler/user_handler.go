@@ -20,7 +20,6 @@ func NewUserHandler(usecase *usecase.UserUsecase) *UserHandler {
 	return &UserHandler{Usecase: usecase}
 }
 
-// TODO: Implement the following methods
 // Register godoc
 // @Summary Register a new user
 // @Description Register a new user in the system
@@ -33,8 +32,17 @@ func NewUserHandler(usecase *usecase.UserUsecase) *UserHandler {
 // @Failure 500 {object} domain.ErrorResponse "Failed to create user"
 // @Router /api/users/register [post]
 func (h *UserHandler) Register(c *fiber.Ctx) error {
-	//TODO: Implement the Register usecase
-	return c.Status(fiber.StatusNotImplemented).JSON(domain.ErrorResponse{Error: "Not implemented"})
+	user := new(domain.User)
+	if err := c.BodyParser(user); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid input"})
+	}
+
+	tokenResponse, err := h.Usecase.Register(user)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(domain.ErrorResponse{Error: "Failed to create user"})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(tokenResponse)
 }
 
 // GetAll godoc
