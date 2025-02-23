@@ -332,11 +332,12 @@ paths:
       - multipart/form-data
       description: Register a new user in the system
       parameters:
-      - description: Username
-        in: formData
-        name: username
+      - description: User data
+        in: body
+        name: user
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/domain.User'
       produces:
       - application/json
       responses:

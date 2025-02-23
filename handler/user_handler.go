@@ -25,7 +25,7 @@ func NewUserHandler(usecase *usecase.UserUsecase) *UserHandler {
 // @Description Register a new user in the system
 // @Accept  multipart/form-data
 // @Produce  json
-// @Param username formData string true "Username"
+// @Param user body domain.User true "User data"
 // @Success 201 {object} domain.TokenResponse
 // @Failure 400 {object} domain.ErrorResponse "Invalid input"
 // @Failure 401 {object} domain.ErrorResponse "Unauthorized"
