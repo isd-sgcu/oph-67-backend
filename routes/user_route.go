@@ -17,7 +17,7 @@ func RegisterUserRoutes(app *fiber.App, userUsecase *usecase.UserUsecase) {
 	// Public routes - No authentication required
 	{
 		api.Post("/signin", userHandler.SignIn)     // User authentication
-		api.Post("/register", userHandler.Register) // New user registration
+		api.Post("/student/register", userHandler.StudentRegister) // New student registration
 	}
 
 	// Authenticated user routes - Requires valid JWT
