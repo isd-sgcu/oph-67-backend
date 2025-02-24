@@ -232,8 +232,7 @@
             "post": {
                 "description": "Register a new user in the system",
                 "consumes": [
-                    "multipart/form-data",
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -241,13 +240,92 @@
                 "summary": "Register a new user",
                 "parameters": [
                     {
-                        "description": "User data",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.User"
-                        }
+                        "type": "string",
+                        "description": "Name",
+                        "name": "name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Phone",
+                        "name": "phone",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Email",
+                        "name": "email",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Status",
+                        "name": "status",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "OtherStatus",
+                        "name": "otherStatus",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Province",
+                        "name": "province",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "School",
+                        "name": "school",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "SelectedSources",
+                        "name": "selectedSources",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "OtherSource",
+                        "name": "otherSource",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "FirstInterest",
+                        "name": "firstInterest",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "SecondInterest",
+                        "name": "secondInterest",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ThirdInterest",
+                        "name": "thirdInterest",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Objective",
+                        "name": "objective",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {

@@ -330,15 +330,70 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      - application/json
       description: Register a new user in the system
       parameters:
-      - description: User data
-        in: body
-        name: user
+      - description: Name
+        in: formData
+        name: name
         required: true
-        schema:
-          $ref: '#/definitions/domain.User'
+        type: string
+      - description: Phone
+        in: formData
+        name: phone
+        required: true
+        type: string
+      - description: Email
+        in: formData
+        name: email
+        type: string
+      - description: Status
+        in: formData
+        name: status
+        required: true
+        type: string
+      - description: OtherStatus
+        in: formData
+        name: otherStatus
+        type: string
+      - description: Province
+        in: formData
+        name: province
+        required: true
+        type: string
+      - description: School
+        in: formData
+        name: school
+        required: true
+        type: string
+      - description: SelectedSources
+        in: formData
+        name: selectedSources
+        required: true
+        type: string
+      - description: OtherSource
+        in: formData
+        name: otherSource
+        type: string
+      - description: FirstInterest
+        in: formData
+        name: firstInterest
+        required: true
+        type: string
+      - description: SecondInterest
+        in: formData
+        name: secondInterest
+        required: true
+        type: string
+      - description: ThirdInterest
+        in: formData
+        name: thirdInterest
+        required: true
+        type: string
+      - description: Objective
+        in: formData
+        name: objective
+        required: true
+        type: string
       produces:
       - application/json
       responses:
