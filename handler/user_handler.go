@@ -71,7 +71,7 @@ func (h *UserHandler) StudentRegister(c *fiber.Ctx) error {
 	// Validate phone number
 	if phone, ok := getFormValue("phone"); ok {
 		if !utils.IsValidPhone(phone) {
-			return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid phone number"})
+			return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid phone number format"})
 		}
 		userData["phone"] = phone
 	} else {
