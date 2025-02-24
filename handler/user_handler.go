@@ -322,6 +322,9 @@ func (h *UserHandler) Delete(c *fiber.Ctx) error {
 func (h *UserHandler) SignIn(c *fiber.Ctx) error {
 	// recieve id from body in plain text
 	id := new(string)
+	if err := c.BodyParser(id); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid input"})
+	}
 
 	tokenResponse, err := h.Usecase.SignIn(*id)
 	if err != nil {
