@@ -243,7 +243,8 @@ const docTemplate = `{
             "post": {
                 "description": "Register a new user in the system",
                 "consumes": [
-                    "multipart/form-data"
+                    "multipart/form-data",
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"

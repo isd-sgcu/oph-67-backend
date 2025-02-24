@@ -330,6 +330,7 @@ paths:
     post:
       consumes:
       - multipart/form-data
+      - application/json
       description: Register a new user in the system
       parameters:
       - description: User data

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -24,6 +25,7 @@ func NewUserHandler(usecase *usecase.UserUsecase) *UserHandler {
 // @Summary Register a new user
 // @Description Register a new user in the system
 // @Accept  multipart/form-data
+// @Accept  json
 // @Produce  json
 // @Param user body domain.User true "User data"
 // @Success 201 {object} domain.TokenResponse
@@ -34,11 +36,16 @@ func NewUserHandler(usecase *usecase.UserUsecase) *UserHandler {
 func (h *UserHandler) Register(c *fiber.Ctx) error {
 	user := new(domain.User)
 	if err := c.BodyParser(user); err != nil {
+		body := c.Body()
+		fmt.Println(string(body))
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid input"})
 	}
 
 	tokenResponse, err := h.Usecase.Register(user)
-	if err != nil {
+
+	if err == domain.ErrInvalidPhone {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid phone number format"})
+	} else if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(domain.ErrorResponse{Error: "Failed to create user"})
 	}
 
