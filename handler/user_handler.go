@@ -20,30 +20,6 @@ func NewUserHandler(usecase *usecase.UserUsecase) *UserHandler {
 	return &UserHandler{Usecase: usecase}
 }
 
-
-// type User struct {
-// 	ID              string         `json:"id" gorm:"primaryKey"`
-// 	UID             string         `json:"uid" gorm:"unique"`
-// 	Name            string         `json:"name"`
-// 	Role            Role           `json:"role"`
-// 	Email           *string        `json:"email"`
-// 	Phone           string         `json:"phone" gorm:"unique"` // Make phone unique
-// 	BirtDate        *time.Time     `json:"birthDate"`
-// 	Status          string         `json:"status"`      // ม.ต้น, ม.ปลาย, ปวช., ปวส. etc.
-// 	OtherStatus     *string        `json:"otherStatus"` // other status
-// 	Province        string         `json:"province"`
-// 	School          string         `json:"school"`
-// 	SelectedSources pq.StringArray `json:"selectedSources" gorm:"type:text[]"`
-// 	OtherSource     *string        `json:"otherSource"`
-// 	FirstInterest   string         `json:"firstInterest"`
-// 	SecondInterest  string         `json:"secondInterest"`
-// 	ThirdInterest   string         `json:"thirdInterest"`
-// 	Objective       string         `json:"objective"`
-// 	RegisteredAt    *time.Time     `json:"registerAt"`
-// 	LastEntered     *time.Time     `json:"lastEntered"` // Timestamp for the last QR scan
-// }
-
-
 // Register godoc
 // @Summary Register a new user
 // @Description Register a new user in the system
@@ -67,7 +43,7 @@ func NewUserHandler(usecase *usecase.UserUsecase) *UserHandler {
 // @Failure 401 {object} domain.ErrorResponse "Unauthorized"
 // @Failure 500 {object} domain.ErrorResponse "Failed to create user"
 // @Router /api/users/register [post]
-func (h *UserHandler) Register(c *fiber.Ctx) error {
+func (h *UserHandler) StudentRegister(c *fiber.Ctx) error {
 	form, err := c.MultipartForm()
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid input"})
