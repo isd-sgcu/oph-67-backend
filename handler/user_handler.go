@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -36,8 +35,6 @@ func NewUserHandler(usecase *usecase.UserUsecase) *UserHandler {
 func (h *UserHandler) Register(c *fiber.Ctx) error {
 	user := new(domain.User)
 	if err := c.BodyParser(user); err != nil {
-		body := c.Body()
-		fmt.Println(string(body))
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid input"})
 	}
 
