@@ -71,11 +71,6 @@ func isSameDay(t1, t2 time.Time) bool {
 func (u *UserUsecase) Register(user *domain.User) (domain.TokenResponse, error) {
 	u.assignRole(user)
 
-	// Validate phone number
-	if !utils.IsValidPhone(user.Phone) {
-		return domain.TokenResponse{}, domain.ErrInvalidPhone
-	}
-
 	// Generate unique UID ensuring no collisions
 	for {
 		user.UID = utils.GenerateUID()

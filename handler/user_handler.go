@@ -20,29 +20,117 @@ func NewUserHandler(usecase *usecase.UserUsecase) *UserHandler {
 	return &UserHandler{Usecase: usecase}
 }
 
+
+// type User struct {
+// 	ID              string         `json:"id" gorm:"primaryKey"`
+// 	UID             string         `json:"uid" gorm:"unique"`
+// 	Name            string         `json:"name"`
+// 	Role            Role           `json:"role"`
+// 	Email           *string        `json:"email"`
+// 	Phone           string         `json:"phone" gorm:"unique"` // Make phone unique
+// 	BirtDate        *time.Time     `json:"birthDate"`
+// 	Status          string         `json:"status"`      // ม.ต้น, ม.ปลาย, ปวช., ปวส. etc.
+// 	OtherStatus     *string        `json:"otherStatus"` // other status
+// 	Province        string         `json:"province"`
+// 	School          string         `json:"school"`
+// 	SelectedSources pq.StringArray `json:"selectedSources" gorm:"type:text[]"`
+// 	OtherSource     *string        `json:"otherSource"`
+// 	FirstInterest   string         `json:"firstInterest"`
+// 	SecondInterest  string         `json:"secondInterest"`
+// 	ThirdInterest   string         `json:"thirdInterest"`
+// 	Objective       string         `json:"objective"`
+// 	RegisteredAt    *time.Time     `json:"registerAt"`
+// 	LastEntered     *time.Time     `json:"lastEntered"` // Timestamp for the last QR scan
+// }
+
+
 // Register godoc
 // @Summary Register a new user
 // @Description Register a new user in the system
 // @Accept  multipart/form-data
-// @Accept  json
 // @Produce  json
-// @Param user body domain.User true "User data"
+// @Param name formData string true "Name"
+// @Param phone formData string true "Phone"
+// @Param email formData string false "Email"
+// @Param status formData string true "Status"
+// @Param otherStatus formData string false "OtherStatus"
+// @Param province formData string true "Province"
+// @Param school formData string true "School"
+// @Param selectedSources formData string true "SelectedSources"
+// @Param otherSource formData string false "OtherSource"
+// @Param firstInterest formData string true "FirstInterest"
+// @Param secondInterest formData string true "SecondInterest"
+// @Param thirdInterest formData string true "ThirdInterest"
+// @Param objective formData string true "Objective"
 // @Success 201 {object} domain.TokenResponse
 // @Failure 400 {object} domain.ErrorResponse "Invalid input"
 // @Failure 401 {object} domain.ErrorResponse "Unauthorized"
 // @Failure 500 {object} domain.ErrorResponse "Failed to create user"
 // @Router /api/users/register [post]
 func (h *UserHandler) Register(c *fiber.Ctx) error {
-	user := new(domain.User)
-	if err := c.BodyParser(user); err != nil {
+	form, err := c.MultipartForm()
+	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid input"})
 	}
 
-	tokenResponse, err := h.Usecase.Register(user)
+	// Helper function to get required form values
+	getFormValue := func(key string) (string, bool) {
+		if v, ok := form.Value[key]; ok && len(v) > 0 {
+			return v[0], true
+		}
+		return "", false
+	}
 
-	if err == domain.ErrInvalidPhone {
-		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid phone number format"})
-	} else if err != nil {
+	// Helper function for optional values
+	getOptionalValue := func(key string) *string {
+		if v, ok := form.Value[key]; ok && len(v) > 0 {
+			return &v[0]
+		}
+		return nil
+	}
+
+	// Initialize user data
+	userData := make(map[string]string)
+
+	// Validate phone number
+	if phone, ok := getFormValue("phone"); ok {
+		if !utils.IsValidPhone(phone) {
+			return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid phone number"})
+		}
+		userData["phone"] = phone
+	} else {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Phone is required"})
+	}
+
+	// Validate required fields
+	requiredFields := []string{"id", "name", "phone", "status", "province", "school", "selectedSources", "firstInterest", "secondInterest", "thirdInterest", "objective"}
+	for _, field := range requiredFields {
+		if value, ok := getFormValue(field); ok {
+			userData[field] = value
+		} else {
+			return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: field + " is required"})
+		}
+	}
+
+	user := &domain.User{
+		ID:              userData["id"],
+		Name:            userData["name"],
+		Email:           getOptionalValue("email"),
+		Phone:           userData["phone"],
+		Status:          userData["status"],
+		OtherStatus:     getOptionalValue("otherStatus"),
+		Province:        userData["province"],
+		School:          userData["school"],
+		SelectedSources: strings.Split(userData["selectedSources"], ","),
+		OtherSource:     getOptionalValue("otherSource"),
+		FirstInterest:   userData["firstInterest"],
+		SecondInterest:  userData["secondInterest"],
+		ThirdInterest:   userData["thirdInterest"],
+		Objective:       userData["objective"],
+	}
+
+	tokenResponse, err := h.Usecase.Register(user)
+	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(domain.ErrorResponse{Error: "Failed to create user"})
 	}
 
@@ -256,10 +344,8 @@ func (h *UserHandler) Delete(c *fiber.Ctx) error {
 // @Failure 500 {object} domain.ErrorResponse "Failed to signin"
 // @Router /api/users/signin [post]
 func (h *UserHandler) SignIn(c *fiber.Ctx) error {
+	// recieve id from body in plain text
 	id := new(string)
-	if err := c.BodyParser(id); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid input"})
-	}
 
 	tokenResponse, err := h.Usecase.SignIn(*id)
 	if err != nil {
