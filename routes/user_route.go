@@ -18,12 +18,14 @@ func RegisterUserRoutes(app *fiber.App, userUsecase *usecase.UserUsecase) {
 	{
 		api.Post("/signin", userHandler.SignIn)     // User authentication
 		api.Post("/student/register", userHandler.StudentRegister) // New student registration
+		// TODO: Implement staff registration endpoint
 	}
 
 	// Authenticated user routes - Requires valid JWT
 	authenticated := api.Group("", middleware.AuthMiddleware(userUsecase))
 	{
 		authenticated.Get("/:id", userHandler.GetById)            // Get user by ID (self)
+		// TODO: PATCH /api/users/:id to update user info
 		authenticated.Patch("/", userHandler.UpdateMyAccountInfo) // Update own account info
 		authenticated.Get("/qr/:id", userHandler.GetQRURL)        // Get user's QR code URL
 	}
