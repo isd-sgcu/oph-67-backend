@@ -252,8 +252,89 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Username",
-                        "name": "username",
+                        "description": "Name",
+                        "name": "name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Phone",
+                        "name": "phone",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Email",
+                        "name": "email",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Status",
+                        "name": "status",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "OtherStatus",
+                        "name": "otherStatus",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Province",
+                        "name": "province",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "School",
+                        "name": "school",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "SelectedSources",
+                        "name": "selectedSources",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "OtherSource",
+                        "name": "otherSource",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "FirstInterest",
+                        "name": "firstInterest",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "SecondInterest",
+                        "name": "secondInterest",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ThirdInterest",
+                        "name": "thirdInterest",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Objective",
+                        "name": "objective",
                         "in": "formData",
                         "required": true
                     }
@@ -645,6 +726,10 @@ const docTemplate = `{
                 "otherSource": {
                     "type": "string"
                 },
+                "otherStatus": {
+                    "description": "other status",
+                    "type": "string"
+                },
                 "phone": {
                     "description": "Make phone unique",
                     "type": "string"
@@ -669,6 +754,10 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "status": {
+                    "description": "ม.ต้น, ม.ปลาย, ปวช., ปวส. etc.",
+                    "type": "string"
                 },
                 "thirdInterest": {
                     "type": "string"
