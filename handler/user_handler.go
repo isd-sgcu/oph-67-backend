@@ -25,6 +25,7 @@ func NewUserHandler(usecase *usecase.UserUsecase) *UserHandler {
 // @Description Register a new user in the system
 // @Accept  multipart/form-data
 // @Produce  json
+// @Param id formData string true "ID"
 // @Param name formData string true "Name"
 // @Param phone formData string true "Phone"
 // @Param email formData string false "Email"
@@ -42,7 +43,7 @@ func NewUserHandler(usecase *usecase.UserUsecase) *UserHandler {
 // @Failure 400 {object} domain.ErrorResponse "Invalid input"
 // @Failure 401 {object} domain.ErrorResponse "Unauthorized"
 // @Failure 500 {object} domain.ErrorResponse "Failed to create user"
-// @Router /api/users/register [post]
+// @Router /api/student/register [post]
 func (h *UserHandler) StudentRegister(c *fiber.Ctx) error {
 	form, err := c.MultipartForm()
 	if err != nil {

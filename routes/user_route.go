@@ -12,7 +12,7 @@ import (
 func RegisterUserRoutes(app *fiber.App, userUsecase *usecase.UserUsecase) {
 	userHandler := handler.NewUserHandler(userUsecase)
 
-	api := app.Group("/api/users")
+	api := app.Group("/api")
 
 	// Public routes - No authentication required
 	{
