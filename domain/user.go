@@ -34,4 +34,16 @@ type User struct {
 	Objective       string         `json:"objective"`
 	RegisteredAt    *time.Time     `json:"registerAt"`
 	LastEntered     *time.Time     `json:"lastEntered"` // Timestamp for the last QR scan
+
+	// For staff/admin only
+	Faculty       *string `json:"faculty"`
+	Year          *int    `json:"year"`
+	IsCenralStaff bool    `json:"isCentralStaff"`
+}
+
+type StudenTransaction struct {
+	ID        string    `json:"id" gorm:"primaryKey"`
+	StudentID string    `json:"studentId"`
+	Faculty   string    `json:"faculty"`
+	RegisteredAt time.Time `json:"registerAt"`
 }
