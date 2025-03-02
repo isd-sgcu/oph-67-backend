@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/isd-sgcu/oph-67-backend/domain"
@@ -175,6 +176,8 @@ func (u *UserUsecase) ScanQR(studentId string, staffId string) (domain.User, err
 	}
 
 	staff, err := u.GetById(staffId)
+	log.Println(staff)
+	log.Println(student)
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -187,6 +190,8 @@ func (u *UserUsecase) ScanQR(studentId string, staffId string) (domain.User, err
 	if u.hasEnteredToday(student.LastEntered, now) {
 		return student, domain.ErrUserAlreadyEntered
 	}
+
+	log.Println(*staff.IsCenralStaff)
 
 	if *staff.IsCenralStaff {
 		return u.processCentralStaffEntry(studentId, &student, now)
