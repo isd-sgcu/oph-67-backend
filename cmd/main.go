@@ -37,10 +37,11 @@ func main() {
 	// Connect to Cache
 
 	// Initialize repositories
-	repo := repository.NewUserRepository(db)
+	userRepo := repository.NewUserRepository(db)
+	transactionRepo := repository.NewStudentTransactionRepository(db)
 
 	// Initialize use cases
-	userUsecase := usecase.NewUserUsecase(repo)
+	userUsecase := usecase.NewUserUsecase(userRepo, transactionRepo)
 
 	// Register routes
 	routes.RegisterUserRoutes(app, userUsecase) // Register the user routes

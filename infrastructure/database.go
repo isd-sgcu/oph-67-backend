@@ -21,7 +21,7 @@ func ConnectDatabase(cfg *config.Config) *gorm.DB {
 	log.Println("Successfully connected to the database")
 
 	// Automatically migrate the schema, creating tables if they don't exist
-	err = db.AutoMigrate(&domain.User{}) // Add your domain models here
+	err = db.AutoMigrate(&domain.User{}, &domain.StudentTransaction{}) // Add your domain models here
 	if err != nil {
 		log.Fatalf("Failed to auto migrate: %v", err)
 	}

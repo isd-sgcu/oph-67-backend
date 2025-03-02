@@ -11,3 +11,4 @@ type ErrorResponse struct {
 var ErrUserAlreadyEntered = errors.New("user has already entered")
 var ErrUserNotFound = errors.New("user not found")
 var ErrUserAlreadyStaff = errors.New("user is already a staff")
+var ErrUserNotCentralStaff = errors.New("user is not a central staff")

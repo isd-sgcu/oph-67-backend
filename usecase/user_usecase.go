@@ -11,7 +11,8 @@ import (
 // UserUsecase provides business logic operations for user management.
 // It depends on a UserRepositoryInterface to interact with the data layer.
 type UserUsecase struct {
-	Repo UserRepositoryInterface
+	UserRepo               UserRepositoryInterface
+	StudentTransactionRepo StudentTransactionRepositoryInterface
 }
 
 // UserRepositoryInterface defines the repository methods required by UserUsecase.
@@ -27,9 +28,19 @@ type UserRepositoryInterface interface {
 	Delete(id string) error
 }
 
+type StudentTransactionRepositoryInterface interface {
+	Create(transaction *domain.StudentTransaction) error
+	GetAll() ([]domain.StudentTransaction, error)
+	GetById(id string) (domain.StudentTransaction, error)
+	GetByStudentId(studentId string) ([]domain.StudentTransaction, error)
+	GetByStudentIdAndFaculty(studentId string, faculty string) ([]domain.StudentTransaction, error)
+	Update(id string, transaction *domain.StudentTransaction) error
+	Delete(id string) error
+}
+
 // NewUserUsecase initializes a new UserUsecase instance with the provided repository.
-func NewUserUsecase(repo UserRepositoryInterface) *UserUsecase {
-	return &UserUsecase{Repo: repo}
+func NewUserUsecase(userRepo UserRepositoryInterface, studentTransactionRepo StudentTransactionRepositoryInterface) *UserUsecase {
+	return &UserUsecase{UserRepo: userRepo, StudentTransactionRepo: studentTransactionRepo}
 }
 
 // assignRole determines and assigns a user's role based on their phone number.
@@ -38,7 +49,7 @@ func NewUserUsecase(repo UserRepositoryInterface) *UserUsecase {
 func (u *UserUsecase) assignRole(user *domain.User) {
 	staffPhones := []string{"06", "05", "04", "03", "02"} // Mock staff phone prefixes
 	adminPhones := []string{"01", "00", "99", "98", "97"} // Mock admin phone prefixes
-	user.Role = domain.Member
+	user.Role = domain.Student
 
 	if user.Phone != "" {
 		for _, phone := range staffPhones {
@@ -74,7 +85,7 @@ func (u *UserUsecase) Register(user *domain.User) (domain.TokenResponse, error) 
 	// Generate unique UID ensuring no collisions
 	for {
 		user.UID = utils.GenerateUID()
-		uidExists, err := u.Repo.IsUIDExists(user.UID)
+		uidExists, err := u.UserRepo.IsUIDExists(user.UID)
 		if err != nil {
 			return domain.TokenResponse{}, fmt.Errorf("error checking UID uniqueness: %w", err)
 		}
@@ -87,7 +98,7 @@ func (u *UserUsecase) Register(user *domain.User) (domain.TokenResponse, error) 
 	user.RegisteredAt = &now
 
 	// Persist user to database
-	if err := u.Repo.Create(user); err != nil {
+	if err := u.UserRepo.Create(user); err != nil {
 		return domain.TokenResponse{}, fmt.Errorf("error saving user: %w", err)
 	}
 
@@ -106,22 +117,31 @@ func (u *UserUsecase) Register(user *domain.User) (domain.TokenResponse, error) 
 
 // GetAll retrieves users, optionally filtered by name if the filter parameter is provided.
 // Returns a list of users or error if repository operation fails.
-func (u *UserUsecase) GetAll(filter string) ([]domain.User, error) {
-	if filter != "" {
-		users, err := u.Repo.GetByName(filter)
+func (u *UserUsecase) GetAll(filter string, role domain.Role) ([]domain.User, error) {
+	if filter != "" || role != "" {
+		users, err := u.UserRepo.GetByName(filter)
+		if role != "" {
+			var filteredUsers []domain.User
+			for _, user := range users {
+				if user.Role == role {
+					filteredUsers = append(filteredUsers, user)
+				}
+			}
+			return filteredUsers, nil
+		}
 		if err != nil {
 			return nil, err
 		}
 		return users, nil
 	}
 
-	return u.Repo.GetAll()
+	return u.UserRepo.GetAll()
 }
 
 // GetById fetches a single user by their unique ID.
 // Returns the user or error if not found or repository operation fails.
 func (u *UserUsecase) GetById(id string) (domain.User, error) {
-	return u.Repo.GetById(id)
+	return u.UserRepo.GetById(id)
 }
 
 // SignIn generates new authentication tokens for an existing user.
@@ -152,29 +172,36 @@ func (u *UserUsecase) Update(id string, updatedUser *domain.User) error {
 		return err
 	}
 
-	return u.Repo.Update(id, updatedUser)
+	return u.UserRepo.Update(id, updatedUser)
 }
 
 // ScanQR records a user's entry by updating their LastEntered timestamp.
 // Returns error if user has already entered today or repository operation fails.
-func (u *UserUsecase) ScanQR(id string) (domain.User, error) {
-	user, err := u.GetById(id)
+func (u *UserUsecase) ScanQR(studentId string, staffId string) (domain.User, error) {
+	student, err := u.GetById(studentId)
 	if err != nil {
 		return domain.User{}, err
+	}
+
+	staff, err := u.GetById(staffId)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	if !u.isCentralStaff(staff) {
+		return domain.User{}, domain.ErrUserNotCentralStaff
 	}
 
 	now := time.Now()
-	if user.LastEntered != nil && isSameDay(*user.LastEntered, now) {
-		return user, domain.ErrUserAlreadyEntered
+	if u.hasEnteredToday(student.LastEntered, now) {
+		return student, domain.ErrUserAlreadyEntered
 	}
 
-	user.LastEntered = &now
-	err = u.Update(id, &user)
-	if err != nil {
-		return domain.User{}, err
+	if *staff.IsCenralStaff {
+		return u.processCentralStaffEntry(studentId, &student, now)
 	}
 
-	return user, nil
+	return u.processFacultyStaffEntry(studentId, *staff.Faculty, now, student)
 }
 
 // UpdateRole changes a user's role to the specified value.
@@ -205,13 +232,13 @@ func (u *UserUsecase) GetQRURL(id string) (string, error) {
 // Delete removes a user from the system by their ID.
 // Returns error if repository operation fails.
 func (u *UserUsecase) Delete(id string) error {
-	return u.Repo.Delete(id)
+	return u.UserRepo.Delete(id)
 }
 
 // AddStaff promotes a user to staff role by looking up their phone number.
 // Returns error if user not found, already staff, or update fails.
 func (u *UserUsecase) AddStaff(phone string) error {
-	user, err := u.Repo.GetByPhone(phone)
+	user, err := u.UserRepo.GetByPhone(phone)
 	if err != nil {
 		return err
 	}
@@ -222,4 +249,45 @@ func (u *UserUsecase) AddStaff(phone string) error {
 
 	user.Role = domain.Staff
 	return u.Update(user.ID, &user)
+}
+
+func (u *UserUsecase) isCentralStaff(staff domain.User) bool {
+	return staff.IsCenralStaff != nil
+}
+
+func (u *UserUsecase) hasEnteredToday(lastEntered *time.Time, now time.Time) bool {
+	return lastEntered != nil && isSameDay(*lastEntered, now)
+}
+
+func (u *UserUsecase) processCentralStaffEntry(studentId string, student *domain.User, now time.Time) (domain.User, error) {
+	student.LastEntered = &now
+	err := u.Update(studentId, student)
+	if err != nil {
+		return domain.User{}, err
+	}
+	return *student, nil
+}
+
+func (u *UserUsecase) processFacultyStaffEntry(studentId, faculty string, now time.Time, student domain.User) (domain.User, error) {
+	existingTransactions, err := u.StudentTransactionRepo.GetByStudentIdAndFaculty(studentId, faculty)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	for _, transaction := range existingTransactions {
+		if isSameDay(transaction.RegisteredAt, now) {
+			return student, domain.ErrUserAlreadyEntered
+		}
+	}
+
+	err = u.StudentTransactionRepo.Create(&domain.StudentTransaction{
+		StudentID:    studentId,
+		Faculty:      faculty,
+		RegisteredAt: now,
+	})
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return student, nil
 }

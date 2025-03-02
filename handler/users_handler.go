@@ -2,12 +2,15 @@ package handler
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/isd-sgcu/oph-67-backend/domain"
 	"github.com/isd-sgcu/oph-67-backend/usecase"
 	"github.com/isd-sgcu/oph-67-backend/utils"
+	"github.com/lib/pq"
 )
 
 // UserHandler represents the handler for user-related endpoints
@@ -20,7 +23,7 @@ func NewUserHandler(usecase *usecase.UserUsecase) *UserHandler {
 	return &UserHandler{Usecase: usecase}
 }
 
-// Register godoc
+// Register Staff godoc
 // @Summary Register a new user
 // @Description Register a new user in the system
 // @Accept  multipart/form-data
@@ -28,7 +31,102 @@ func NewUserHandler(usecase *usecase.UserUsecase) *UserHandler {
 // @Param id formData string true "ID"
 // @Param name formData string true "Name"
 // @Param phone formData string true "Phone"
-// @Param email formData string false "Email"
+// @Param email formData string true "Email"
+// @Param faculty formData string true "Faculty"
+// @Param Year	formData  int  true "Year"
+// @Param IsCentralStaff formData boolean true "IsCentralStaff"
+// @Success 201 {object} domain.TokenResponse
+// @Failure 400 {object} domain.ErrorResponse "Invalid input"
+// @Failure 401 {object} domain.ErrorResponse "Unauthorized"
+// @Failure 500 {object} domain.ErrorResponse "Failed to create user"
+// @Router /api/staff/register [post]
+func (h *UserHandler) StaffRegister(c *fiber.Ctx) error {
+	form, err := c.MultipartForm()
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid input"})
+	}
+
+	// Helper function to get required form values
+	getFormValue := func(key string) (string, bool) {
+		if v, ok := form.Value[key]; ok && len(v) > 0 {
+			return v[0], true
+		}
+		return "", false
+	}
+
+	// Helper function for optional values
+	getOptionalValue := func(key string) *string {
+		if v, ok := form.Value[key]; ok && len(v) > 0 {
+			return &v[0]
+		}
+		return nil
+	}
+
+	// Initialize user data
+	userData := make(map[string]string)
+
+	// Validate phone number
+	if phone, ok := getFormValue("phone"); ok {
+		if !utils.IsValidPhone(phone) {
+			return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid phone number format"})
+		}
+		userData["phone"] = phone
+	} else {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Phone is required"})
+	}
+
+	// Validate required fields
+	requiredFields := []string{"id", "name", "phone", "email"}
+	for _, field := range requiredFields {
+		if value, ok := getFormValue(field); ok {
+			userData[field] = value
+		} else {
+			return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: field + " is required"})
+		}
+	}
+
+	user := &domain.User{
+		ID:      userData["id"],
+		Name:    userData["name"],
+		Role:    domain.Staff,
+		Email:   userData["email"],
+		Phone:   userData["phone"],
+		Faculty: getOptionalValue("faculty"),
+		Year: func() *int {
+			if yearStr := getOptionalValue("year"); yearStr != nil {
+				if year, err := strconv.Atoi(*yearStr); err == nil {
+					return &year
+				}
+			}
+			return nil
+		}(),
+		IsCenralStaff: func() *bool {
+			if isCentralStaffStr := getOptionalValue("isCentralStaff"); isCentralStaffStr != nil {
+				if isCentralStaff, err := strconv.ParseBool(*isCentralStaffStr); err == nil {
+					return &isCentralStaff
+				}
+			}
+			return nil
+		}(),
+	}
+
+	tokenResponse, err := h.Usecase.Register(user)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(domain.ErrorResponse{Error: "Failed to create user"})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(tokenResponse)
+}
+
+// Register Student godoc
+// @Summary Register a new user
+// @Description Register a new user in the system
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param id formData string true "ID"
+// @Param name formData string true "Name"
+// @Param phone formData string true "Phone"
+// @Param email formData string true "Email"
 // @Param status formData string true "Status"
 // @Param otherStatus formData string false "OtherStatus"
 // @Param province formData string true "Province"
@@ -80,7 +178,7 @@ func (h *UserHandler) StudentRegister(c *fiber.Ctx) error {
 	}
 
 	// Validate required fields
-	requiredFields := []string{"id", "name", "phone", "status", "province", "school", "selectedSources", "firstInterest", "secondInterest", "thirdInterest", "objective"}
+	requiredFields := []string{"id", "name", "phone", "email"}
 	for _, field := range requiredFields {
 		if value, ok := getFormValue(field); ok {
 			userData[field] = value
@@ -89,21 +187,32 @@ func (h *UserHandler) StudentRegister(c *fiber.Ctx) error {
 		}
 	}
 
+	selectedSources := userData["selectedSources"]
+	var selectedSourcesArray *pq.StringArray
+
+	if selectedSources != "" {
+		arr := pq.StringArray(strings.Split(selectedSources, ","))
+		selectedSourcesArray = &arr
+	} else {
+		selectedSourcesArray = nil // or &pq.StringArray{} if you prefer an empty array
+	}
+
 	user := &domain.User{
 		ID:              userData["id"],
 		Name:            userData["name"],
-		Email:           getOptionalValue("email"),
+		Role:            domain.Student,
+		Email:           userData["email"],
 		Phone:           userData["phone"],
-		Status:          userData["status"],
+		Status:          getOptionalValue("status"),
 		OtherStatus:     getOptionalValue("otherStatus"),
-		Province:        userData["province"],
-		School:          userData["school"],
-		SelectedSources: strings.Split(userData["selectedSources"], ","),
+		Province:        getOptionalValue("province"),
+		School:          getOptionalValue("school"),
+		SelectedSources: selectedSourcesArray,
 		OtherSource:     getOptionalValue("otherSource"),
-		FirstInterest:   userData["firstInterest"],
-		SecondInterest:  userData["secondInterest"],
-		ThirdInterest:   userData["thirdInterest"],
-		Objective:       userData["objective"],
+		FirstInterest:   getOptionalValue("firstInterest"),
+		SecondInterest:  getOptionalValue("secondInterest"),
+		ThirdInterest:   getOptionalValue("thirdInterest"),
+		Objective:       getOptionalValue("objective"),
 	}
 
 	tokenResponse, err := h.Usecase.Register(user)
@@ -115,10 +224,11 @@ func (h *UserHandler) StudentRegister(c *fiber.Ctx) error {
 }
 
 // GetAll godoc
-// @Summary Get all users
+// @Summary Get all student
 // @Description Retrieve a list of all users with optional filtering
 // @Produce  json
 // @Param name query string false "Filter by name"
+// @Param role query string false "Filter by role"
 // @security BearerAuth
 // @Success 200 {array} domain.User
 // @Failure 500 {object} domain.ErrorResponse "Failed to fetch users"
@@ -126,8 +236,9 @@ func (h *UserHandler) StudentRegister(c *fiber.Ctx) error {
 func (h *UserHandler) GetAll(c *fiber.Ctx) error {
 	// Get query parameters
 	filter := c.Query("name")
+	role := c.Query("role")
 
-	users, err := h.Usecase.GetAll(filter)
+	users, err := h.Usecase.GetAll(filter, domain.Role(role))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(domain.ErrorResponse{Error: "Failed to fetch users"})
 	}
@@ -187,15 +298,24 @@ func (h *UserHandler) Update(c *fiber.Ctx) error {
 // @Summary Scan QR code
 // @Description Retrieve a user by its ID
 // @Produce  json
-// @security BearerAuth
-// @Param id path string true "User ID"
+// @Security BearerAuth
+// @Param id path string true "Student ID"
 // @Success 200 {object} domain.User
 // @Failure 500 {object} domain.ErrorResponse "Failed to fetch User"
 // @Failure 400 {object} domain.ErrorResponse "User has already entered"
 // @Router /api/users/qr/{id} [post]
 func (h *UserHandler) ScanQR(c *fiber.Ctx) error {
-	id := c.Params("id")
-	user, err := h.Usecase.ScanQR(id)
+	// Extract student ID from URL params
+	studentId := c.Params("id")
+
+	// Extract staff ID from JWT token
+	staffId, err := getUserIDFromJWT(c)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Error: "Unauthorized"})
+	}
+
+	// Call use case with both student and staff IDs
+	user, err := h.Usecase.ScanQR(studentId, staffId)
 	if err != nil {
 		if errors.Is(err, domain.ErrUserAlreadyEntered) {
 			t := user.LastEntered.String()
@@ -203,6 +323,7 @@ func (h *UserHandler) ScanQR(c *fiber.Ctx) error {
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(domain.ErrorResponse{Error: "Failed to scan QR"})
 	}
+
 	return c.Status(fiber.StatusOK).JSON(user)
 }
 
@@ -355,4 +476,20 @@ func (h *UserHandler) AddStaff(c *fiber.Ctx) error {
 	}
 
 	return c.SendStatus(fiber.StatusNoContent)
+}
+
+func getUserIDFromJWT(c *fiber.Ctx) (string, error) {
+	userToken := c.Locals("user").(*jwt.Token) // Extract JWT token from Fiber context
+	claims, ok := userToken.Claims.(jwt.MapClaims)
+	if !ok || userToken == nil {
+		return "", errors.New("invalid token")
+	}
+
+	// Extract `userId` from JWT claims
+	userId, ok := claims["userId"].(string)
+	if !ok {
+		return "", errors.New("user ID not found in token")
+	}
+
+	return userId, nil
 }
