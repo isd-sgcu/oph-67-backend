@@ -15,34 +15,24 @@ func RegisterUserRoutes(app *fiber.App, userUsecase *usecase.UserUsecase) {
 	api := app.Group("/api")
 
 	// Public routes - No authentication required
-	{
-		api.Post("/signin", userHandler.SignIn)                    // User authentication
-		api.Post("/student/register", userHandler.StudentRegister) // New student registration
-		api.Post("/staff/register", userHandler.StaffRegister)     // New staff registration
-	}
+	api.Post("/signin", userHandler.SignIn)                    // User authentication
+	api.Post("/student/register", userHandler.StudentRegister) // New student registration
+	api.Post("/staff/register", userHandler.StaffRegister)     // New staff registration
 
 	// Authenticated user routes - Requires valid JWT
-	authenticated := api.Group("", middleware.AuthMiddleware(userUsecase))
-	{
-		authenticated.Get("/:id", userHandler.GetById)            // Get user by ID (self)
-		authenticated.Patch("/:id", userHandler.Update)           // Update own account info
-		authenticated.Patch("/", userHandler.UpdateMyAccountInfo) // Update own account info
-		authenticated.Get("/qr/:id", userHandler.GetQRURL)        // Get user's QR code URL
-	}
+	authenticated := api.Group("/users", middleware.AuthMiddleware(userUsecase))
+	authenticated.Get("/:id", userHandler.GetById)    // Get user by ID (self)
+	authenticated.Patch("/:id", userHandler.Update)   // Update own account info
+	authenticated.Get("/qr/:id", userHandler.GetQRURL) // Get user's QR code URL
 
 	// Staff/Admin routes - Requires Staff or Admin role
-	staffAdmin := api.Group("", middleware.RoleMiddleware(userUsecase, domain.Staff, domain.Admin))
-	{
-		staffAdmin.Get("/", userHandler.GetAll)        // List all users
-		staffAdmin.Post("/qr/:id", userHandler.ScanQR) // Scan user QR code
-	}
+	staffAdmin := api.Group("/users", middleware.RoleMiddleware(userUsecase, domain.Staff, domain.Admin))
+	staffAdmin.Get("/", userHandler.GetAll)          // List all users
+	staffAdmin.Post("/qr/:id", userHandler.ScanQR)  // Scan user QR code
 
 	// Admin-only routes - Requires Admin role
-	admin := api.Group("", middleware.RoleMiddleware(userUsecase, domain.Admin))
-	{
-		admin.Patch("/:id", userHandler.Update)               // Update any user account
-		admin.Delete("/:id", userHandler.Delete)              // Delete user
-		admin.Patch("/role/:id", userHandler.UpdateRole)      // Update user role
-		admin.Patch("/addstaff/:phone", userHandler.AddStaff) // Promote user to Staff by phone
-	}
+	admin := api.Group("/admin", middleware.RoleMiddleware(userUsecase, domain.Admin))
+	admin.Delete("/:id", userHandler.Delete)              // Delete user
+	admin.Patch("/role/:id", userHandler.UpdateRole)      // Update user role
+	admin.Patch("/addstaff/:phone", userHandler.AddStaff) // Promote user to Staff by phone
 }

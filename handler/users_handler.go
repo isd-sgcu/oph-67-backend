@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/isd-sgcu/oph-67-backend/domain"
 	"github.com/isd-sgcu/oph-67-backend/usecase"
 	"github.com/isd-sgcu/oph-67-backend/utils"
@@ -307,9 +306,13 @@ func (h *UserHandler) Update(c *fiber.Ctx) error {
 func (h *UserHandler) ScanQR(c *fiber.Ctx) error {
 	// Extract student ID from URL params
 	studentId := c.Params("id")
+	authHeader := c.Get("Authorization")
+	if authHeader == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Error: "Missing token"})
+	}
 
 	// Extract staff ID from JWT token
-	staffId, err := getUserIDFromJWT(c)
+	staffId, err := utils.DecodeToken(strings.TrimPrefix(authHeader, "Bearer "), utils.GetEnv("SECRET_JWT_KEY", ""))
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(domain.ErrorResponse{Error: "Unauthorized"})
 	}
@@ -476,20 +479,4 @@ func (h *UserHandler) AddStaff(c *fiber.Ctx) error {
 	}
 
 	return c.SendStatus(fiber.StatusNoContent)
-}
-
-func getUserIDFromJWT(c *fiber.Ctx) (string, error) {
-	userToken := c.Locals("user").(*jwt.Token) // Extract JWT token from Fiber context
-	claims, ok := userToken.Claims.(jwt.MapClaims)
-	if !ok || userToken == nil {
-		return "", errors.New("invalid token")
-	}
-
-	// Extract `userId` from JWT claims
-	userId, ok := claims["userId"].(string)
-	if !ok {
-		return "", errors.New("user ID not found in token")
-	}
-
-	return userId, nil
 }

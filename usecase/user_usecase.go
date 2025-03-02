@@ -47,18 +47,9 @@ func NewUserUsecase(userRepo UserRepositoryInterface, studentTransactionRepo Stu
 // This is a temporary implementation using mock phone number lists for demonstration.
 // TODO: Replace mock data with a proper role assignment mechanism (e.g., database lookup).
 func (u *UserUsecase) assignRole(user *domain.User) {
-	staffPhones := []string{"06", "05", "04", "03", "02"} // Mock staff phone prefixes
-	adminPhones := []string{"01", "00", "99", "98", "97"} // Mock admin phone prefixes
-	user.Role = domain.Student
+	adminPhones := []string{"0949823195"} // Mock admin phone prefixes
 
 	if user.Phone != "" {
-		for _, phone := range staffPhones {
-			if user.Phone == phone {
-				user.Role = domain.Staff
-				break
-			}
-		}
-
 		for _, phone := range adminPhones {
 			if user.Phone == phone {
 				user.Role = domain.Admin

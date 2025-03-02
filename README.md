@@ -1,70 +1,64 @@
+# OPH-2025 Backend API Documentation
 
-# OPH-2025 Backend
+## User Management
 
-## Stack
-- **Go** (Golang)
-- **Fiber** (Go Web Framework)
-- **PostgreSQL**
+### 1. Register New Staff Member
+**Endpoint:** `POST /api/staff/register`  
+**Request Format (multipart/form-data):**
+- `id`: string (required)
+- `name`: string (required)
+- `phone`: string (required, format: 0812345678)
+- `email`: string (required)
+- `faculty`: string (optional)
+- `year`: int (optional)
+- `isCentralStaff`: boolean (optional)
 
-## Getting Started
-
-### Prerequisites
-- Go 1.22 or later
-- Docker
-- Makefile
-
-### Installation
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/isd-sgcu/cutu2025-backend.git
-   cd cutu2025-backend
-   ```
-
-2. **Setup environment:**
-   ```bash
-   cp .env.example .env
-   # Edit .env file with your configurations
-   ```
-
-3. **Install dependencies:**
-   ```bash
-   go mod download
-   ```
-
-### Running
-**Start Database:**
-```bash
-docker-compose up -d
+**Success Response (201):**
+```json
+{
+  "accessToken": "string",
+  "userId": "string"
+}
 ```
 
-**Run Server:**
-```bash
-make server  # Normal mode
-```
-
-**Re-create doc**
-```bash
-swag init -g cmd/main.go  # Normal mode
-```
+**Error Responses:**
+- `400 Bad Request`: Missing required fields or invalid phone format
+- `500 Internal Server Error`: Failed to create user
 
 ---
 
-## API Documentation
-
-### User Management
-
-#### 1. Register New User *Need Implementation*
-**Endpoint:** `POST /api/users/register`  
+### 2. Register New Student
+**Endpoint:** `POST /api/student/register`  
 **Request Format (multipart/form-data):**
+- `id`: string (required)
+- `name`: string (required)
+- `phone`: string (required, format: 0812345678)
+- `email`: string (required)
+- `status`: string (optional)
+- `otherStatus`: string (optional)
+- `province`: string (optional)
+- `school`: string (optional)
+- `selectedSources`: string (comma-separated list, optional)
+- `otherSource`: string (optional)
+- `firstInterest`: string (optional)
+- `secondInterest`: string (optional)
+- `thirdInterest`: string (optional)
+- `objective`: string (optional)
+
+example
 ```
-name: string
-phone: string (format: 0812345678)
-province: string
-school: string
-firstInterest: string
-secondInterest: string
-thirdInterest: string
-other...
+name:John Doe
+phone:0949823192
+email:john.doe@example.com
+status:Study
+province:Bangkok
+school:CU
+selectedSources:[Facebook,Website]	
+firstInterest:Business
+secondInterest:Technology
+thirdInterest:Marketing
+objective:Learn for skill
+id:11345677
 ```
 
 **Success Response (201):**
@@ -75,71 +69,76 @@ other...
 }
 ```
 
-#### 2. Get All Users
+**Error Responses:**  
+Same as Staff Registration
+
+---
+
+### 3. Get All Users
 **Endpoint:** `GET /api/users`  
 **Permissions:** Bearer Token (Staff/Admin)  
 **Query Parameters:**
-- `name`: Filter by name
+- `name`: Filter by name (optional)
+- `role`: Filter by role (`member`/`staff`/`admin`/`student`)
 
 **Success Response (200):**
 ```json
 [
   {
-    "id": "string",
-    "name": "string",
+    "id": "user1",
+    "name": "John Doe",
     "phone": "+66812345678",
-    "province": "Bangkok",
-    "school": "Chulalongkorn University"
+    "role": "staff",
+    "email": "john@example.com",
+    "faculty": "Engineering"
   }
 ]
 ```
 
-#### 3. Get User by ID
+---
+
+### 4. Get User by ID
 **Endpoint:** `GET /api/users/{id}`  
 **Permissions:** Bearer Token
 
 **Success Response (200):**
 ```json
 {
-  "id": "string",
-  "uid": "string",
-  "name": "string",
+  "id": "user1",
+  "name": "John Doe",
   "phone": "+66812345678",
-  "province": "Bangkok",
+  "role": "student",
   "school": "Chulalongkorn University",
-  "firstInterest": "Technology",
-  "secondInterest": "Design",
-  "thirdInterest": "Business"
+  "firstInterest": "Technology"
 }
 ```
 
-#### 4. Update User
+---
+
+### 5. Update User
 **Endpoint:** `PATCH /api/users/{id}`  
 **Permissions:** Bearer Token  
-**Request Body:**
+**Request Body (JSON):**
 ```json
 {
-  "email": "user@example.com",
-  "birthDate": "2000-01-01T00:00:00Z",
+  "email": "new@example.com",
   "school": "New University"
 }
 ```
 
-**Success Response:** 204 No Content
+**Success Response:** `204 No Content`
 
 ---
 
-### QR Code Management
-
-#### 5. Scan QR Code
-**Endpoint:** `POST /api/users/qr/{id}`  
+### 6. Scan QR Code
+**Endpoint:** `POST /api/users/qr/{studentId}`  
 **Permissions:** Bearer Token (Staff/Admin)
 
 **Success Response (200):**
 ```json
 {
-  "id": "string",
-  "name": "string",
+  "id": "user1",
+  "name": "John Doe",
   "lastEntered": "2024-01-01T12:00:00Z"
 }
 ```
@@ -154,88 +153,47 @@ other...
 
 ---
 
-### Admin Operations
-
-#### 6. Add Staff Member
+### 7. Add Staff Member
 **Endpoint:** `PATCH /api/users/addstaff/{phone}`  
 **Permissions:** Bearer Token (Admin)
 
-**Success Response:** 204 No Content
+**Success Response:** `204 No Content`
 
 ---
 
 ## Data Structures
 
 ### User Model
-```go
-type User struct {
-    ID              string     `json:"id"`
-    UID             string     `json:"uid"`
-    Name            string     `json:"name"`
-    Email           *string    `json:"email"`
-    Phone           string     `json:"phone"`
-    BirthDate       *time.Time `json:"birthDate"`
-    Role            Role       `json:"role"`
-    Province        string     `json:"province"`
-    School          string     `json:"school"`
-    SelectedSources []string   `json:"selectedSources"`
-    OtherSource     *string    `json:"otherSource"`
-    FirstInterest   string     `json:"firstInterest"`
-    SecondInterest  string     `json:"secondInterest"`
-    ThirdInterest   string     `json:"thirdInterest"`
-    Objective       string     `json:"objective"`
-    RegisteredAt    *time.Time `json:"registerAt"`
-    LastEntered     *time.Time `json:"lastEntered"`
-}
-```
+| Field             | Type            | Description                     |
+|-------------------|-----------------|---------------------------------|
+| `id`              | string          | Unique user identifier          |
+| `role`            | Role            | `staff`/`admin`/`student` |
+| `selectedSources` | array[string]   | Sources user heard about event  |
+| `faculty`         | string          | Staff member's faculty          |
+| `isCentralStaff`  | boolean         | Central committee status        |
 
-### Enumerations
-**User Roles:**
+### Full Role Enumeration
 ```go
-type Role string
-const (
-    Member Role = "member"
-    Staff  Role = "staff"
-    Admin  Role = "admin"
-)
+enum Role {
+  staff
+  admin
+  student
+}
 ```
 
 ---
 
-## Error Handling
-
-### Common Responses
-**400 Bad Request:**
+## Error Examples
+**403 Forbidden (Insufficient Permissions):**
 ```json
 {
-  "error": "Invalid phone number format"
+  "error": "Only admins can modify user roles"
 }
 ```
 
-**401 Unauthorized:**
+**404 Not Found (User Not Found):**
 ```json
 {
-  "error": "Missing or invalid token"
-}
-```
-
-**403 Forbidden:**
-```json
-{
-  "error": "Insufficient permissions"
-}
-```
-
-**404 Not Found:**
-```json
-{
-  "error": "User not found"
-}
-```
-
-**500 Internal Server Error:**
-```json
-{
-  "error": "Database connection failed"
+  "error": "User not found with ID: user123"
 }
 ```
