@@ -37,6 +37,8 @@ type User struct {
 
 	// For staff/admin only
 	Faculty       *string `json:"faculty"`
+	StudentID     *string `json:"studentId"`
+	Nickname      *string `json:"nickname"`
 	Year          *int    `json:"year"`
 	IsCenralStaff *bool   `json:"isCentralStaff"`
 }

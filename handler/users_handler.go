@@ -32,7 +32,9 @@ func NewUserHandler(usecase *usecase.UserUsecase) *UserHandler {
 // @Param phone formData string true "Phone"
 // @Param email formData string true "Email"
 // @Param faculty formData string true "Faculty"
-// @Param Year	formData  int  true "Year"
+// @Param Year	formData  int  true "true"
+// @Param Nickname formData string true "Nickname"
+// @Param StudentID formData string true "StudentID"
 // @Param IsCentralStaff formData boolean true "IsCentralStaff"
 // @Success 201 {object} domain.TokenResponse
 // @Failure 400 {object} domain.ErrorResponse "Invalid input"
@@ -85,12 +87,14 @@ func (h *UserHandler) StaffRegister(c *fiber.Ctx) error {
 	}
 
 	user := &domain.User{
-		ID:      userData["id"],
-		Name:    userData["name"],
-		Role:    domain.Staff,
-		Email:   userData["email"],
-		Phone:   userData["phone"],
-		Faculty: getOptionalValue("faculty"),
+		ID:        userData["id"],
+		Name:      userData["name"],
+		Nickname:  getOptionalValue("nickname"),
+		StudentID: getOptionalValue("studentId"),
+		Role:      domain.Staff,
+		Email:     userData["email"],
+		Phone:     userData["phone"],
+		Faculty:   getOptionalValue("faculty"),
 		Year: func() *int {
 			if yearStr := getOptionalValue("year"); yearStr != nil {
 				if year, err := strconv.Atoi(*yearStr); err == nil {

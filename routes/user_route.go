@@ -21,14 +21,14 @@ func RegisterUserRoutes(app *fiber.App, userUsecase *usecase.UserUsecase) {
 
 	// Authenticated user routes - Requires valid JWT
 	authenticated := api.Group("/users", middleware.AuthMiddleware(userUsecase))
-	authenticated.Get("/:id", userHandler.GetById)    // Get user by ID (self)
-	authenticated.Patch("/:id", userHandler.Update)   // Update own account info
+	authenticated.Get("/:id", userHandler.GetById)     // Get user by ID (self)
+	authenticated.Patch("/:id", userHandler.Update)    // Update own account info
 	authenticated.Get("/qr/:id", userHandler.GetQRURL) // Get user's QR code URL
 
 	// Staff/Admin routes - Requires Staff or Admin role
 	staffAdmin := api.Group("/users", middleware.RoleMiddleware(userUsecase, domain.Staff, domain.Admin))
-	staffAdmin.Get("/", userHandler.GetAll)          // List all users
-	staffAdmin.Post("/qr/:id", userHandler.ScanQR)  // Scan user QR code
+	staffAdmin.Get("/", userHandler.GetAll)        // List all users
+	staffAdmin.Post("/qr/:id", userHandler.ScanQR) // Scan user QR code
 
 	// Admin-only routes - Requires Admin role
 	admin := api.Group("/admin", middleware.RoleMiddleware(userUsecase, domain.Admin))
