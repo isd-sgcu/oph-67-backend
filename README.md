@@ -8,6 +8,8 @@
 - `id`: string (required)
 - `name`: string (required)
 - `phone`: string (required, format: 0812345678)
+- `nickname`: string (required)
+- `studentId`: string (required)
 - `email`: string (required)
 - `faculty`: string (optional)
 - `year`: int (optional)
