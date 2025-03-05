@@ -2,11 +2,12 @@ package infrastructure
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/isd-sgcu/oph-67-backend/config"
 	"github.com/isd-sgcu/oph-67-backend/domain"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
 )
 
 func ConnectDatabase(cfg *config.Config) *gorm.DB {
@@ -21,7 +22,7 @@ func ConnectDatabase(cfg *config.Config) *gorm.DB {
 	log.Println("Successfully connected to the database")
 
 	// Automatically migrate the schema, creating tables if they don't exist
-	err = db.AutoMigrate(&domain.User{}, &domain.StudentTransaction{}) // Add your domain models here
+	err = db.AutoMigrate(&domain.StudentTransaction{}, &domain.User{} ) // Add your domain models here
 	if err != nil {
 		log.Fatalf("Failed to auto migrate: %v", err)
 	}
