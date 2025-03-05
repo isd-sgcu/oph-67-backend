@@ -40,7 +40,7 @@ type User struct {
 	StudentID     *string `json:"studentId"`
 	Nickname      *string `json:"nickname"`
 	Year          *int    `json:"year"`
-	IsCenralStaff *bool   `json:"isCentralStaff"`
+	IsCentralStaff *bool   `json:"isCentralStaff"`
 }
 
 type StudentTransaction struct {
