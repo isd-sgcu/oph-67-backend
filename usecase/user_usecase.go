@@ -191,9 +191,9 @@ func (u *UserUsecase) ScanQR(studentId string, staffId string) (domain.User, err
 		return student, domain.ErrUserAlreadyEntered
 	}
 
-	log.Println(*staff.IsCenralStaff)
+	log.Println(*staff.IsCentralStaff)
 
-	if *staff.IsCenralStaff {
+	if *staff.IsCentralStaff {
 		return u.processCentralStaffEntry(studentId, &student, now)
 	}
 
@@ -248,7 +248,7 @@ func (u *UserUsecase) AddStaff(phone string) error {
 }
 
 func (u *UserUsecase) isCentralStaff(staff domain.User) bool {
-	return staff.IsCenralStaff != nil
+	return staff.IsCentralStaff != nil
 }
 
 func (u *UserUsecase) hasEnteredToday(lastEntered *time.Time, now time.Time) bool {

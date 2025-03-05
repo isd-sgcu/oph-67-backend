@@ -103,7 +103,7 @@ func (h *UserHandler) StaffRegister(c *fiber.Ctx) error {
 			}
 			return nil
 		}(),
-		IsCenralStaff: func() *bool {
+		IsCentralStaff: func() *bool {
 			if isCentralStaffStr := getOptionalValue("isCentralStaff"); isCentralStaffStr != nil {
 				if isCentralStaff, err := strconv.ParseBool(*isCentralStaffStr); err == nil {
 					return &isCentralStaff
