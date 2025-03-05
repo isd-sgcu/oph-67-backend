@@ -21,7 +21,7 @@ type User struct {
 	Role            Role            `json:"role"`
 	Email           string          `json:"email"`
 	Phone           string          `json:"phone" gorm:"unique"` // Make phone unique
-	BirtDate        *time.Time      `json:"birthDate"`
+	BirthDate        *time.Time      `json:"birthDate"`
 	Status          *string         `json:"status"`      // ม.ต้น, ม.ปลาย, ปวช., ปวส. etc.
 	OtherStatus     *string         `json:"otherStatus"` // other status
 	Province        *string         `json:"province"`
