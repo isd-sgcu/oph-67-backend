@@ -21,7 +21,7 @@ type User struct {
 	Role            Role            `json:"role"`
 	Email           string          `json:"email"`
 	Phone           string          `json:"phone" gorm:"unique"` // Make phone unique
-	BirthDate        *time.Time      `json:"birthDate"`
+	BirthDate       *time.Time      `json:"birthDate"`
 	Status          *string         `json:"status"`      // ม.ต้น, ม.ปลาย, ปวช., ปวส. etc.
 	OtherStatus     *string         `json:"otherStatus"` // other status
 	Province        *string         `json:"province"`
@@ -36,19 +36,19 @@ type User struct {
 	LastEntered     *time.Time      `json:"lastEntered"` // Timestamp for the last QR scan
 
 	// For staff/admin only
-	Faculty       *string `json:"faculty"`
-	StudentID     *string `json:"studentId"`
-	Nickname      *string `json:"nickname"`
-	Year          *int    `json:"year"`
+	Faculty        *string `json:"faculty"`
+	StudentID      *string `json:"studentId"`
+	Nickname       *string `json:"nickname"`
+	Year           *int    `json:"year"`
 	IsCentralStaff *bool   `json:"isCentralStaff"`
 }
 
 type StudentTransaction struct {
-	ID           string    `json:"id" gorm:"primaryKey"`
-	StudentID    string    `json:"studentId" gorm:"index"` // Foreign key index
-	Faculty      string    `json:"faculty"`
-	RegisteredAt time.Time `json:"registeredAt"`
+	ID                    string    `json:"id" gorm:"primaryKey"`
+	StudentRegistrationID string    `json:"studentId" gorm:"index"` // Foreign key index
+	Faculty               string    `json:"faculty"`
+	RegisteredAt          time.Time `json:"registeredAt"`
 
 	// Relationship
-	Student User `gorm:"foreignKey:StudentID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Student User `gorm:"foreignKey:StudentRegistrationID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }

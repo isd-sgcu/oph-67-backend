@@ -277,9 +277,9 @@ func (u *UserUsecase) processFacultyStaffEntry(studentId, faculty string, now ti
 	}
 
 	err = u.StudentTransactionRepo.Create(&domain.StudentTransaction{
-		StudentID:    studentId,
-		Faculty:      faculty,
-		RegisteredAt: now,
+		StudentRegistrationID: studentId,
+		Faculty:               faculty,
+		RegisteredAt:          now,
 	})
 	if err != nil {
 		return domain.User{}, err
