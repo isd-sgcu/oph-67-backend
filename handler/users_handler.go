@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/isd-sgcu/oph-67-backend/domain"
@@ -135,6 +136,7 @@ func (h *UserHandler) StaffRegister(c *fiber.Ctx) error {
 // @Param province formData string true "Province"
 // @Param school formData string true "School"
 // @Param selectedSources formData string true "SelectedSources"
+// @Param birthDate formData string false "BirthDate"
 // @Param otherSource formData string false "OtherSource"
 // @Param firstInterest formData string true "FirstInterest"
 // @Param secondInterest formData string true "SecondInterest"
@@ -206,6 +208,15 @@ func (h *UserHandler) StudentRegister(c *fiber.Ctx) error {
 		Role:            domain.Student,
 		Email:           userData["email"],
 		Phone:           userData["phone"],
+		BirthDate: func() *time.Time {
+			if birthDate := getOptionalValue("birthDate"); birthDate != nil {
+				if parsedDate, err := time.Parse("2006-01-02", *birthDate); err == nil {
+					return &parsedDate
+				}
+			}
+			return nil
+		}(),
+		
 		Status:          getOptionalValue("status"),
 		OtherStatus:     getOptionalValue("otherStatus"),
 		Province:        getOptionalValue("province"),

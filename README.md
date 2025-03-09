@@ -38,6 +38,7 @@
 - `email`: string (required)
 - `status`: string (optional)
 - `otherStatus`: string (optional)
+- `birthDate`: string (optional, format 2004-05-02)
 - `province`: string (optional)
 - `school`: string (optional)
 - `selectedSources`: string (comma-separated list, optional)
