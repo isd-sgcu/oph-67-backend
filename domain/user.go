@@ -46,7 +46,7 @@ type User struct {
 
 type StudentTransaction struct {
 	ID                    string    `json:"id" gorm:"primaryKey"`
-	StudentRegistrationID string    `json:"studentId" gorm:"index"` // Foreign key index
+	StudentRegistrationID string    `json:"studentId"` // Foreign key index
 	Faculty               string    `json:"faculty"`
 	RegisteredAt          time.Time `json:"registeredAt"`
 
