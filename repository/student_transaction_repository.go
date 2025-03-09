@@ -35,7 +35,7 @@ func (r *StudentTransactionRepository) GetById(id string) (domain.StudentTransac
 // Get student transactions by student ID
 func (r *StudentTransactionRepository) GetByStudentId(studentId string) ([]domain.StudentTransaction, error) {
 	var transactions []domain.StudentTransaction
-	err := r.DB.Where("student_id = ?", studentId).Find(&transactions).Error
+	err := r.DB.Where("student_registration_id = ?", studentId).Find(&transactions).Error
 	return transactions, err
 }
 
@@ -53,6 +53,6 @@ func (r *StudentTransactionRepository) Delete(id string) error {
 
 func (r *StudentTransactionRepository) GetByStudentIdAndFaculty(studentId string, faculty string) ([]domain.StudentTransaction, error) {
 	var transactions []domain.StudentTransaction
-	err := r.DB.Where("student_id = ? AND faculty = ?", studentId, faculty).Find(&transactions).Error
+	err := r.DB.Where("student_registration_id = ? AND faculty = ?", studentId, faculty).Find(&transactions).Error
 	return transactions, err
 }

@@ -187,17 +187,18 @@ func (u *UserUsecase) ScanQR(studentId string, staffId string) (domain.User, err
 	}
 
 	now := time.Now()
+
+	if !*staff.IsCentralStaff {
+		return u.processFacultyStaffEntry(studentId, *staff.Faculty, now, student)
+	}
+
 	if u.hasEnteredToday(student.LastEntered, now) {
 		return student, domain.ErrUserAlreadyEntered
 	}
 
-	log.Println(*staff.IsCentralStaff)
+	log.Println("Is Central", *staff.IsCentralStaff)
 
-	if *staff.IsCentralStaff {
-		return u.processCentralStaffEntry(studentId, &student, now)
-	}
-
-	return u.processFacultyStaffEntry(studentId, *staff.Faculty, now, student)
+	return u.processCentralStaffEntry(studentId, &student, now)
 }
 
 // UpdateRole changes a user's role to the specified value.
