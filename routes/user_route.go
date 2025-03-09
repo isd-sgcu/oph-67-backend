@@ -15,7 +15,7 @@ func RegisterUserRoutes(app *fiber.App, userUsecase *usecase.UserUsecase) {
 	api := app.Group("/api")
 
 	// Public routes - No authentication required
-	api.Post("/users/signin", userHandler.SignIn)                    // User authentication
+	api.Post("/users/signin", userHandler.SignIn)              // User authentication
 	api.Post("/student/register", userHandler.StudentRegister) // New student registration
 	api.Post("/staff/register", userHandler.StaffRegister)     // New staff registration
 

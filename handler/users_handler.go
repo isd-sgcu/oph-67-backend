@@ -192,22 +192,22 @@ func (h *UserHandler) StudentRegister(c *fiber.Ctx) error {
 		}
 	}
 
-	selectedSources := userData["selectedSources"]
+	selectedSources := getOptionalValue("selectedSources")
 	var selectedSourcesArray *pq.StringArray
 
-	if selectedSources != "" {
-		arr := pq.StringArray(strings.Split(selectedSources, ","))
+	if selectedSources != nil && *selectedSources != "" {
+		arr := pq.StringArray(strings.Split(*selectedSources, ","))
 		selectedSourcesArray = &arr
 	} else {
 		selectedSourcesArray = nil // or &pq.StringArray{} if you prefer an empty array
 	}
 
 	user := &domain.User{
-		ID:              userData["id"],
-		Name:            userData["name"],
-		Role:            domain.Student,
-		Email:           userData["email"],
-		Phone:           userData["phone"],
+		ID:    userData["id"],
+		Name:  userData["name"],
+		Role:  domain.Student,
+		Email: userData["email"],
+		Phone: userData["phone"],
 		BirthDate: func() *time.Time {
 			if birthDate := getOptionalValue("birthDate"); birthDate != nil {
 				if parsedDate, err := time.Parse("2006-01-02", *birthDate); err == nil {
@@ -216,7 +216,7 @@ func (h *UserHandler) StudentRegister(c *fiber.Ctx) error {
 			}
 			return nil
 		}(),
-		
+
 		Status:          getOptionalValue("status"),
 		OtherStatus:     getOptionalValue("otherStatus"),
 		Province:        getOptionalValue("province"),
