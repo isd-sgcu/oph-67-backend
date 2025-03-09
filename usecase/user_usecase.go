@@ -228,7 +228,7 @@ func (u *UserUsecase) GetQRURL(id string) (string, error) {
 // Delete removes a user from the system by their ID.
 // Returns error if repository operation fails.
 func (u *UserUsecase) Delete(id string) error {
-	return u.UserRepo.Delete(id)
+	return u.UserRepo.Update(id, &domain.User{Role: domain.Member})
 }
 
 // AddStaff promotes a user to staff role by looking up their phone number.

@@ -9,6 +9,7 @@ import (
 type Role string
 
 const (
+	Member Role = "member"
 	Student Role = "student"
 	Staff   Role = "staff"
 	Admin   Role = "admin"
