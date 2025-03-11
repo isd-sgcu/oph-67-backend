@@ -173,6 +173,12 @@ Same as Staff Registration
 "admin" | "staff"
 ```
 
+### 9. Delete
+**Endpoint:** `DELETE /api/admin/delete/{userId}`  
+**Permissions:** Bearer Token (Admin)
+
+**Success Response:** `204 No Content`
+
 ---
 
 ## Data Structures
