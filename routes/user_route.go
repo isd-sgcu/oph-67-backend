@@ -31,8 +31,8 @@ func RegisterUserRoutes(app *fiber.App, userUsecase *usecase.UserUsecase) {
 	staffAdmin.Post("/qr/:id", userHandler.ScanQR) // Scan user QR code
 
 	// Admin-only routes - Requires Admin role
-	admin := api.Group("/admin", middleware.RoleMiddleware(userUsecase, domain.Admin))
-	admin.Delete("/:id", userHandler.Delete)              // Delete user
-	admin.Patch("/role/:id", userHandler.UpdateRole)      // Update user role
-	admin.Patch("/addstaff/:phone", userHandler.AddStaff) // Promote user to Staff by phone
+	admin := api.Group("/admin", middleware.RoleMiddleware(userUsecase, domain.Admin));
+	admin.Delete("/:id", userHandler.Delete);           // Delete user
+	admin.Patch("/role/:id", userHandler.UpdateRole);      // Update user role
+	admin.Patch("/addstaff/:phone", userHandler.AddStaff); // Promote user to Staff by phone
 }

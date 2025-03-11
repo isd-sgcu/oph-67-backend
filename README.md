@@ -157,10 +157,21 @@ Same as Staff Registration
 ---
 
 ### 7. Add Staff Member
-**Endpoint:** `PATCH /api/users/addstaff/{phone}`  
+**Endpoint:** `PATCH /api/admin/addstaff/{phone}`  
 **Permissions:** Bearer Token (Admin)
 
 **Success Response:** `204 No Content`
+
+---
+
+### 8. Change Role
+**Endpoint:** `PATCH /api/admin/role/{userId}`  
+**Permissions:** Bearer Token (Admin)
+
+**Success Response:** `204 No Content`
+```json
+"admin" | "staff"
+```
 
 ---
 
