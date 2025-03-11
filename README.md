@@ -170,7 +170,9 @@ Same as Staff Registration
 
 **Success Response:** `204 No Content`
 ```json
-"admin" | "staff"
+{
+    "role": "admin"
+}
 ```
 
 ### 9. Delete

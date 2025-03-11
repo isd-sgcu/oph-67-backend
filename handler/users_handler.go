@@ -353,7 +353,7 @@ func (h *UserHandler) ScanQR(c *fiber.Ctx) error {
 // @Produce  json
 // @Security BearerAuth
 // @Param id path string true "User ID"
-// @Param role body domain.Role true "User Role"
+// @Param role body domain.RoleRequest true "User Role"
 // @Success 204
 // @Failure 400 {object} domain.ErrorResponse "Invalid input"
 // @Failure 401 {object} domain.ErrorResponse "Unauthorized"
@@ -363,11 +363,11 @@ func (h *UserHandler) ScanQR(c *fiber.Ctx) error {
 // @Router /api/users/role/{id} [patch]
 func (h *UserHandler) UpdateRole(c *fiber.Ctx) error {
 	id := c.Params("id")
-	role := new(domain.Role)
+	role := new(domain.RoleRequest)
 	if err := c.BodyParser(role); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid input"})
 	}
-	if err := h.Usecase.UpdateRole(id, *role); err != nil {
+	if err := h.Usecase.UpdateRole(id, domain.Role(role.Role)); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(domain.ErrorResponse{Error: "Failed to update this role user"})
 	}
 
