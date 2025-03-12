@@ -226,9 +226,9 @@ func (u *UserUsecase) GetQRURL(id string) (string, error) {
 	return fmt.Sprintf("%s/api/users/qr/%s", baseURL, user.ID), nil
 }
 
-// Delete removes a user from the system by their ID.
+// RemoveStaff removes a user from the system by their ID.
 // Returns error if repository operation fails.
-func (u *UserUsecase) Delete(id string) error {
+func (u *UserUsecase) RemoveStaff(id string) error {
 	return u.UserRepo.Update(id, &domain.User{Role: domain.Member})
 }
 
@@ -246,6 +246,11 @@ func (u *UserUsecase) AddStaff(phone string) error {
 
 	user.Role = domain.Staff
 	return u.Update(user.ID, &user)
+}
+
+// Delete All user
+func (u *UserUsecase) Delete(id string) error {
+	return u.UserRepo.Delete(id)
 }
 
 func (u *UserUsecase) isCentralStaff(staff domain.User) bool {

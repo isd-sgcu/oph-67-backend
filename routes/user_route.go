@@ -32,7 +32,8 @@ func RegisterUserRoutes(app *fiber.App, userUsecase *usecase.UserUsecase) {
 
 	// Admin-only routes - Requires Admin role
 	admin := api.Group("/admin", middleware.RoleMiddleware(userUsecase, domain.Admin))
-	admin.Delete("/:id", userHandler.Delete)              // Delete user
+	admin.Delete("/:id", userHandler.RemoveStaff)         // Delete user
 	admin.Patch("/role/:id", userHandler.UpdateRole)      // Update user role
 	admin.Patch("/addstaff/:phone", userHandler.AddStaff) // Promote user to Staff by phone
+	admin.Delete("/users/:id", userHandler.Delete)       // Delete user
 }
