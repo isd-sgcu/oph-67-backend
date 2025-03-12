@@ -35,5 +35,5 @@ func RegisterUserRoutes(app *fiber.App, userUsecase *usecase.UserUsecase) {
 	admin.Delete("/:id", userHandler.RemoveStaff)         // Delete user
 	admin.Patch("/role/:id", userHandler.UpdateRole)      // Update user role
 	admin.Patch("/addstaff/:phone", userHandler.AddStaff) // Promote user to Staff by phone
-	admin.Delete("/users/:id", userHandler.Delete)       // Delete user
+	admin.Delete("/users/:id", userHandler.Delete)        // Delete user
 }

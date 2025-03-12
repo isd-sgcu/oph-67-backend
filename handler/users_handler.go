@@ -449,7 +449,6 @@ func (h *UserHandler) RemoveStaff(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
-
 // Delete user godoc
 // @Summary RemoveStaff user by ID
 // @Description RemoveStaff a user by its ID
