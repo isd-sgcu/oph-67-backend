@@ -481,12 +481,12 @@ func (h *UserHandler) Delete(c *fiber.Ctx) error {
 // @Router /api/users/signin [post]
 func (h *UserHandler) SignIn(c *fiber.Ctx) error {
 	// recieve id from body in plain text
-	id := new(string)
+	id := new(domain.SignInRequest)
 	if err := c.BodyParser(id); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(domain.ErrorResponse{Error: "Invalid input"})
 	}
 
-	tokenResponse, err := h.Usecase.SignIn(*id)
+	tokenResponse, err := h.Usecase.SignIn(id.ID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(domain.ErrorResponse{Error: "Failed to signin"})
 	}
