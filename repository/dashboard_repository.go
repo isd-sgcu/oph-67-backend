@@ -21,7 +21,7 @@ func (r *DashBoardRepository) GetFacultyCount() ([]domain.FacultyPercent, error)
             t.faculty,
             SUM(t.first_count) AS first_interest,
             SUM(t.second_count) AS second_interest,
-            SUM(t.third_count) AS third_count
+            SUM(t.third_count) AS third_interest
         FROM users
         CROSS JOIN LATERAL (
             VALUES 
