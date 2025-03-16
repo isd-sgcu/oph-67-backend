@@ -38,13 +38,16 @@ func main() {
 
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
+	dashBoardRepo := repository.NewDashBoardRepository(db)
 	transactionRepo := repository.NewStudentTransactionRepository(db)
 
 	// Initialize use cases
 	userUsecase := usecase.NewUserUsecase(userRepo, transactionRepo)
+	dashBoardUssecase := usecase.NewDashBoardUseCase(dashBoardRepo)
 
 	// Register routes
 	routes.RegisterUserRoutes(app, userUsecase) // Register the user routes
+	routes.RegisterDashboardRoutes(app, dashBoardUssecase)
 
 	app.Get("/swagger/*", swagger.New(swagger.Config{
 		URL: "/swagger/doc.json", // URL to access the Swagger docs
