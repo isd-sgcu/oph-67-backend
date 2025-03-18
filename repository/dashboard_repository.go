@@ -62,8 +62,8 @@ func (r *DashBoardRepository) GetAgeGroupCount() ([]domain.AgeCount, error) {
 	return results, err
 }
 
-func (r *DashBoardRepository) GetFacultyToday() (domain.FacultyRegisterCount, error) {
-	var result domain.FacultyRegisterCount
+func (r *DashBoardRepository) GetFacultyToday() ([]domain.FacultyRegisterCount, error) {
+	var result []domain.FacultyRegisterCount
 
 	// 1. เขียน Query หาคณะที่ลงทะเบียนมากที่สุดในวันนี้
 	err := r.DB.Model(&domain.StudentTransaction{}).
