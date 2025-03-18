@@ -12,7 +12,7 @@ type DashBoardRepositoryInterface interface {
 	GetFacultyCount() ([]domain.FacultyPercent, error)
 	GetSourceCount() ([]domain.SourceCount, error)
 	GetAgeGroupCount() ([]domain.AgeCount, error)
-	GetFacultyToday() ([]domain.FacultyPercent, error)
+	GetFacultyToday() ([]domain.FacultyRegisterCount, error)
 	GetStatusStudent()	([]domain.StatusCount, error)
 }
 
@@ -32,10 +32,10 @@ func (d *DashboardUseCase) GetAgeGroupCount() ([]domain.AgeCount, error) {
 	return d.DashboardRepo.GetAgeGroupCount()
 }
 
-func (d *DashboardUseCase) GetFacultyTodayCount() ([]domain.FacultyPercent, error) {
+func (d *DashboardUseCase) GetFacultyTodayCount() ([]domain.FacultyRegisterCount, error) {
 	return d.DashboardRepo.GetFacultyToday()
 }
 
-func (d *DashboardUseCase) GetStatusStudent() ([]domain.SourceCount, error) {
-	return d.DashboardRepo.GetSourceCount()
+func (d *DashboardUseCase) GetStatusStudent() ([]domain.StatusCount, error) {
+	return d.DashboardRepo.GetStatusStudent()
 }
