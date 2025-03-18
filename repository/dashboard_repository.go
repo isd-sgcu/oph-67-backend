@@ -86,3 +86,49 @@ func (r *DashBoardRepository) GetStatusStudent() ([]domain.StatusCount, error) {
 	err := r.DB.Raw(query).Scan(&results).Error
 	return results, err
 }
+
+func (r *DashBoardRepository) GetAllStudents() ([]domain.StudentProfile, error) {
+	var students []domain.StudentProfile
+
+	err := r.DB.Model(&domain.User{}).
+		Select(
+			"id",
+			"name",
+			"email",
+			"phone",
+			"first_interest",
+			"second_interest",
+			"third_interest",
+			"registered_at",
+		).
+		Where("role = ?", domain.Student).
+		Scan(&students).
+		Error
+
+	return students, err
+}
+
+func (r *DashBoardRepository) GetStudentsByFacultyInterest(faculty string) ([]domain.StudentProfile, error) {
+	var students []domain.StudentProfile
+
+	err := r.DB.Model(&domain.User{}).
+		Select(
+			"id",
+			"name",
+			"email",
+			"phone",
+			"first_interest",
+			"second_interest",
+			"third_interest",
+		).
+		Where("role = ?", domain.Student).
+		Where(
+			r.DB.Where("first_interest = ?", faculty).
+				Or("second_interest = ?", faculty).
+				Or("third_interest = ?", faculty),
+		).
+		Scan(&students).
+		Error
+
+	return students, err
+}

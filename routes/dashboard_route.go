@@ -17,4 +17,5 @@ func RegisterDashboardRoutes(app *fiber.App, dashboardUsecase *usecase.Dashboard
 	dashboard.Get("/ages", dashboardHandler.GetAgeGroupCount)
 	dashboard.Get("/faculties/today", dashboardHandler.GetFacultyTodayCount)
 	dashboard.Get("/status", dashboardHandler.GetStatusStudent)
+	dashboard.Get("/download", dashboardHandler.ExportAllStudents)
 }

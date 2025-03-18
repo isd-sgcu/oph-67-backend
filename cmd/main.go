@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/swagger"
 	"github.com/isd-sgcu/oph-67-backend/config"
@@ -24,6 +25,9 @@ func main() {
 
 	// Add middleware
 	app.Use(middleware.RequestLoggerMiddleware())
+	app.Use(compress.New(compress.Config{
+		Level: compress.LevelBestSpeed,
+	}))
 
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "*",                                           // Allowed origin
