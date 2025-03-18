@@ -12,7 +12,7 @@ type DashBoardRepositoryInterface interface {
 	GetFacultyCount() ([]domain.FacultyPercent, error)
 	GetSourceCount() ([]domain.SourceCount, error)
 	GetAgeGroupCount() ([]domain.AgeCount, error)
-	GetFacultyTodayCount() ([]domain.FacultyPercent, error)
+	GetFacultyToday() ([]domain.FacultyPercent, error)
 	GetStatusStudent()	([]domain.StatusCount, error)
 }
 
@@ -33,7 +33,7 @@ func (d *DashboardUseCase) GetAgeGroupCount() ([]domain.AgeCount, error) {
 }
 
 func (d *DashboardUseCase) GetFacultyTodayCount() ([]domain.FacultyPercent, error) {
-	return d.DashboardRepo.GetFacultyCount()
+	return d.DashboardRepo.GetFacultyToday()
 }
 
 func (d *DashboardUseCase) GetStatusStudent() ([]domain.SourceCount, error) {
