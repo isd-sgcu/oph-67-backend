@@ -11,7 +11,10 @@ func RegisterDashboardRoutes(app *fiber.App, dashboardUsecase *usecase.Dashboard
 
 	api := app.Group("/api")
 
-	authenticated := api.Group("/dashboard")
-	authenticated.Get("/faculties", dashboardHandler.GetFacultyCount)
-	authenticated.Get("/sources", dashboardHandler.GetSourceCount)
+	dashboard := api.Group("/dashboard")
+	dashboard.Get("/faculties", dashboardHandler.GetFacultyCount)
+	dashboard.Get("/sources", dashboardHandler.GetSourceCount)
+	dashboard.Get("/ages", dashboardHandler.GetAgeGroupCount)
+	dashboard.Get("/faculties/today", dashboardHandler.GetFacultyTodayCount)
+	dashboard.Get("/status", dashboardHandler.GetStatusStudent)
 }
