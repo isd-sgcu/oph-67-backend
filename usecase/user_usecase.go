@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/isd-sgcu/oph-67-backend/domain"
@@ -192,27 +191,19 @@ func (u *UserUsecase) ScanQR(studentId string, staffId string) (domain.User, err
 	}
 
 	staff, err := u.GetById(staffId)
-	log.Println(staff)
-	log.Println(student)
 	if err != nil {
 		return domain.User{}, err
 	}
 
-	if !u.isCentralStaff(staff) {
-		return domain.User{}, domain.ErrUserNotCentralStaff
-	}
-
 	now := time.Now()
+
+	if !u.isCentralStaff(staff) {
+		return u.processFacultyStaffEntry(studentId, *staff.Faculty, now, student)
+	}
 
 	if !*staff.IsCentralStaff {
 		return u.processFacultyStaffEntry(studentId, *staff.Faculty, now, student)
 	}
-
-	if u.hasEnteredToday(student.LastEntered, now) {
-		return student, domain.ErrUserAlreadyEntered
-	}
-
-	log.Println("Is Central", *staff.IsCentralStaff)
 
 	return u.processCentralStaffEntry(studentId, &student, now)
 }
@@ -270,6 +261,7 @@ func (u *UserUsecase) Delete(id string) error {
 }
 
 func (u *UserUsecase) isCentralStaff(staff domain.User) bool {
+	fmt.Println("Is Central", staff.IsCentralStaff)
 	return staff.IsCentralStaff != nil
 }
 
