@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -90,26 +89,25 @@ func (u *UserUsecase) Register(user *domain.User) (domain.TokenResponse, error) 
 
 	// Check if user already exists
 	existingUser, err := u.UserRepo.GetById(user.ID)
-	if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
-		return domain.TokenResponse{}, fmt.Errorf("error fetching user: %w", err)
-	}
-
-	if existingUser.ID != "" {
-		if existingUser.Role == domain.Member {
-			existingUser.Role = domain.Staff
-			if err := u.UserRepo.Update(existingUser.ID, &existingUser); err != nil {
-				return domain.TokenResponse{}, fmt.Errorf("error updating user role: %w", err)
-			}
+	if err != nil {
+		fmt.Println("Error fetching user", err)
+		fmt.Println("Trying to create user")
+		// User not found, create a new one
+		if err := u.UserRepo.Create(user); err != nil {
+			return domain.TokenResponse{}, fmt.Errorf("error saving user: %w", err)
 		}
-		return u.generateTokenResponse(&existingUser)
+		return u.generateTokenResponse(user)
 	}
 
-	// Persist new user to database
-	if err := u.UserRepo.Create(user); err != nil {
-		return domain.TokenResponse{}, fmt.Errorf("error saving user: %w", err)
+	// Promote to staff if already exists and is a member
+	if existingUser.Role == domain.Member {
+		existingUser.Role = domain.Staff
+		if err := u.UserRepo.Update(existingUser.ID, &existingUser); err != nil {
+			return domain.TokenResponse{}, fmt.Errorf("error updating user role: %w", err)
+		}
 	}
 
-	return u.generateTokenResponse(user)
+	return u.generateTokenResponse(&existingUser)
 }
 
 func (u *UserUsecase) generateTokenResponse(user *domain.User) (domain.TokenResponse, error) {
