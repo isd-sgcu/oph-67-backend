@@ -265,9 +265,9 @@ func (u *UserUsecase) isCentralStaff(staff domain.User) bool {
 	return staff.IsCentralStaff != nil
 }
 
-func (u *UserUsecase) hasEnteredToday(lastEntered *time.Time, now time.Time) bool {
-	return lastEntered != nil && isSameDay(*lastEntered, now)
-}
+// func (u *UserUsecase) hasEnteredToday(lastEntered *time.Time, now time.Time) bool {
+// 	return lastEntered != nil && isSameDay(*lastEntered, now)
+// }
 
 func (u *UserUsecase) processCentralStaffEntry(studentId string, student *domain.User, now time.Time) (domain.User, error) {
 	student.LastEntered = &now
