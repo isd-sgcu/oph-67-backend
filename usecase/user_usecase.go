@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -68,14 +69,12 @@ func isSameDay(t1, t2 time.Time) bool {
 	return y1 == y2 && m1 == m2 && d1 == d2
 }
 
-// Register handles user registration by generating a unique UID, assigning a role,
-// persisting the user, and returning authentication tokens.
-// Returns TokenResponse with access token or error if any step fails.
 func (u *UserUsecase) Register(user *domain.User) (domain.TokenResponse, error) {
 	u.assignRole(user)
 
-	// Generate unique UID ensuring no collisions
-	for {
+	// Ensure UID is unique with a loop limit
+	maxAttempts := 10
+	for attempts := 0; attempts < maxAttempts; attempts++ {
 		user.UID = utils.GenerateUID()
 		uidExists, err := u.UserRepo.IsUIDExists(user.UID)
 		if err != nil {
@@ -89,12 +88,31 @@ func (u *UserUsecase) Register(user *domain.User) (domain.TokenResponse, error) 
 	now := time.Now()
 	user.RegisteredAt = &now
 
-	// Persist user to database
+	// Check if user already exists
+	existingUser, err := u.UserRepo.GetById(user.ID)
+	if err != nil && !errors.Is(err, domain.ErrUserNotFound) {
+		return domain.TokenResponse{}, fmt.Errorf("error fetching user: %w", err)
+	}
+
+	if existingUser.ID != "" {
+		if existingUser.Role == domain.Member {
+			existingUser.Role = domain.Staff
+			if err := u.UserRepo.Update(existingUser.ID, &existingUser); err != nil {
+				return domain.TokenResponse{}, fmt.Errorf("error updating user role: %w", err)
+			}
+		}
+		return u.generateTokenResponse(&existingUser)
+	}
+
+	// Persist new user to database
 	if err := u.UserRepo.Create(user); err != nil {
 		return domain.TokenResponse{}, fmt.Errorf("error saving user: %w", err)
 	}
 
-	// Generate JWT tokens for authentication
+	return u.generateTokenResponse(user)
+}
+
+func (u *UserUsecase) generateTokenResponse(user *domain.User) (domain.TokenResponse, error) {
 	jwtSecret := utils.GetEnv("SECRET_JWT_KEY", "")
 	accessToken, err := utils.GenerateTokens(user.ID, jwtSecret)
 	if err != nil {
