@@ -197,7 +197,7 @@ func (u *UserUsecase) ScanQR(studentId string, staffId string) (domain.User, err
 
 	now := time.Now()
 
-	if !u.isNull(staff) {
+	if u.isNull(staff) {
 		return u.processFacultyStaffEntry(studentId, *staff.Faculty, now, student)
 	}
 
@@ -261,7 +261,7 @@ func (u *UserUsecase) Delete(id string) error {
 }
 
 func (u *UserUsecase) isNull(staff domain.User) bool {
-	return staff.IsCentralStaff != nil
+	return staff.IsCentralStaff == nil
 }
 
 // func (u *UserUsecase) hasEnteredToday(lastEntered *time.Time, now time.Time) bool {
@@ -270,6 +270,7 @@ func (u *UserUsecase) isNull(staff domain.User) bool {
 
 func (u *UserUsecase) processCentralStaffEntry(studentId string, student *domain.User, now time.Time) (domain.User, error) {
 	student.LastEntered = &now
+	student.Faculty = nil
 	err := u.Update(studentId, student)
 	if err != nil {
 		return domain.User{}, err
