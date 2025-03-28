@@ -197,7 +197,7 @@ func (u *UserUsecase) ScanQR(studentId string, staffId string) (domain.User, err
 
 	now := time.Now()
 
-	if !u.isCentralStaff(staff) {
+	if !u.isNull(staff) {
 		return u.processFacultyStaffEntry(studentId, *staff.Faculty, now, student)
 	}
 
@@ -260,8 +260,7 @@ func (u *UserUsecase) Delete(id string) error {
 	return u.UserRepo.Delete(id)
 }
 
-func (u *UserUsecase) isCentralStaff(staff domain.User) bool {
-	fmt.Println("Is Central", staff.IsCentralStaff)
+func (u *UserUsecase) isNull(staff domain.User) bool {
 	return staff.IsCentralStaff != nil
 }
 
