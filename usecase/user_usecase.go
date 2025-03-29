@@ -197,7 +197,11 @@ func (u *UserUsecase) ScanQR(studentId string, staffId string) (domain.User, err
 
 	now := time.Now()
 
-	if staff.Faculty != nil {
+	if u.isNull(staff) {
+		return u.processFacultyStaffEntry(studentId, *staff.Faculty, now, student)
+	}
+
+	if !*staff.IsCentralStaff {
 		return u.processFacultyStaffEntry(studentId, *staff.Faculty, now, student)
 	}
 
