@@ -283,15 +283,15 @@ func (u *UserUsecase) processFacultyStaffEntry(studentId, faculty string, now ti
 	if err != nil {
 		return domain.User{}, err
 	}
+	student.LastEntered = &now
+	updateErr := u.UserRepo.Update(studentId, &student)
+	if updateErr != nil {
+		return domain.User{}, fmt.Errorf("failed to update last entered time: %w", updateErr)
+	}
 
 	for _, transaction := range existingTransactions {
 		if isSameDay(transaction.RegisteredAt, now) {
-			transaction.RegisteredAt = now
-			updateErr := u.StudentTransactionRepo.Update(transaction.ID, &transaction)
-			if updateErr != nil {
-				return domain.User{}, fmt.Errorf("failed to update entry time: %w", updateErr)
-			}
-			return student, nil
+			return student, domain.ErrUserAlreadyEntered
 		}
 	}
 
