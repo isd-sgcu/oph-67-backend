@@ -41,3 +41,7 @@ type StudentProfile struct {
 	SecondInterest string `json:"second_interest"`
 	ThirdInterest  string `json:"third_interest"`
 }
+
+type AttendedCount struct {
+	Count int `json:"count"`
+}

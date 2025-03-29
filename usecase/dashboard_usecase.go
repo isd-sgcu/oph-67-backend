@@ -16,6 +16,7 @@ type DashBoardRepositoryInterface interface {
 	GetStatusStudent() ([]domain.StatusCount, error)
 	GetAllStudents() ([]domain.StudentProfile, error)
 	GetStudentsByFacultyInterest(faculty string) ([]domain.StudentProfile, error)
+	GetAttendedCount() ([]domain.AttendedCount, error)
 }
 
 func NewDashBoardUseCase(dashboardRepo DashBoardRepositoryInterface) *DashboardUseCase {
@@ -48,4 +49,8 @@ func (d *DashboardUseCase) GetAllStudent() ([]domain.StudentProfile, error) {
 
 func (d *DashboardUseCase) GetStudentsByFacultyInterest(faculty string) ([]domain.StudentProfile, error) {
 	return d.DashboardRepo.GetStudentsByFacultyInterest(faculty)
+}
+
+func (d *DashboardUseCase) GetAttendedCount() ([]domain.AttendedCount, error) {
+	return d.DashboardRepo.GetAttendedCount()
 }

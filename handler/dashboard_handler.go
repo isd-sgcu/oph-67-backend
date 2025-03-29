@@ -121,3 +121,11 @@ func getSafeString(s *string) string {
 	}
 	return ""
 }
+
+func (h *DashBoardHandler) GetAttendedCount(c *fiber.Ctx) error {
+	results, err := h.Usecase.GetAttendedCount()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.JSON(results)
+}

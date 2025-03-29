@@ -132,3 +132,15 @@ func (r *DashBoardRepository) GetStudentsByFacultyInterest(faculty string) ([]do
 
 	return students, err
 }
+
+func (r *DashBoardRepository) GetAttendedCount() ([]domain.AttendedCount, error) {
+	var results []domain.AttendedCount
+
+	err := r.DB.Model(&domain.User{}).
+		Select("COUNT(*) AS count").
+		Where("last_entered IS NOT NULL").
+		Scan(&results).Error
+
+	return results, err
+
+}
