@@ -1,11 +1,16 @@
 package repository
 
+import (
+	"github.com/isd-sgcu/oph-67-backend/domain"
+	"gorm.io/gorm"
+)
+
 type StudentEvaluationRepository struct {
 	DB *gorm.DB
 }
 
 func NewStudentEvaluationRepository(db *gorm.DB) *StudentEvaluationRepository {
-	return &StudentTransactionRepository{DB: db}
+	return &StudentEvaluationRepository{DB: db}
 }
 
 // Create a new student evaluation
