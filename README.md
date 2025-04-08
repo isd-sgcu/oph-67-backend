@@ -263,6 +263,11 @@ Here is the updated **Student Evaluation API Documentation** reflecting your lat
 #### Request Body
 Same structure as Create endpoint.
 
+example
+```
+http://127.0.0.1:4000/api/student-evaluation?student_id=5b86c093-bd0e-449c-bf64-49e111e5c184
+```
+
 #### Responses
 - `200 OK` – Evaluation updated.
 - `400 Bad Request` – Missing or invalid input.
