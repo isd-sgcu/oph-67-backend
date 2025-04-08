@@ -183,6 +183,120 @@ Same as Staff Registration
 
 ---
 
+Here is the updated **Student Evaluation API Documentation** reflecting your latest route and handler implementation:
+
+---
+
+# Student Evaluation API Documentation
+
+**Base URL:** `/api/student-evaluation`
+
+---
+
+## Authentication
+
+- **JWT Required** for all routes
+- **Staff/Admin Role Required** for listing all evaluations
+
+---
+
+## Endpoints
+
+### 1. Create a Student Evaluation  
+**POST** `/api/student-evaluation/`  
+**Authorization:** Bearer Token (JWT)  
+**Role:** Any authenticated user
+
+#### Request Body
+```json
+{
+  "newSources": ["Instagram", "Friend"],
+  "overallActivity": 4,
+  "interestActivity": 5,
+  "receivedFacultyInfoClearly": 4,
+  "wouldRecommendCUOpenHouseNextTime": 5,
+  "favoriteBooth": "Engineering",
+  "activityDiversity": 4,
+  "perceivedCrowdDensity": 3,
+  "hasFullBoothAccess": 1,
+  "facilityConvenienceRating": 4,
+  "campusNavigationRating": 4,
+  "hesitationLevelAfterDisaster": 2,
+  "lineOASignupRating": 5,
+  "designBeautyRating": 4,
+  "websiteImprovementSuggestions": "Improve mobile responsiveness"
+}
+```
+
+#### Responses
+- `201 Created` – Evaluation successfully created.
+- `401 Unauthorized` – Missing or invalid JWT.
+- `409 Conflict` – Evaluation already exists for this user.
+- `400 Bad Request` – Invalid input.
+- `500 Internal Server Error`
+
+---
+
+### 2. Get Student Evaluation by ID  
+**GET** `/api/student-evaluation/:id`  
+**Authorization:** Bearer Token  
+**Role:** Any authenticated user
+
+#### Path Parameters
+- `id` – Student ID
+
+#### Responses
+- `200 OK` – Returns the student evaluation.
+- `400 Bad Request` – Missing student ID.
+- `404 Not Found` – Evaluation not found.
+
+---
+
+### 3. Update Student Evaluation  
+**PATCH** `/api/student-evaluation/:id`  
+**Authorization:** Bearer Token  
+**Role:** Any authenticated user
+
+#### Path Parameters
+- `id` – Student ID
+
+#### Request Body
+Same structure as Create endpoint.
+
+#### Responses
+- `200 OK` – Evaluation updated.
+- `400 Bad Request` – Missing or invalid input.
+- `500 Internal Server Error`
+
+---
+
+### 4. Delete Student Evaluation  
+**DELETE** `/api/student-evaluation/:id`  
+**Authorization:** Bearer Token  
+**Role:** Any authenticated user
+
+#### Path Parameters
+- `id` – Student ID
+
+#### Responses
+- `204 No Content` – Evaluation deleted.
+- `400 Bad Request` – Missing student ID.
+- `500 Internal Server Error`
+
+---
+
+### 5. Get All Student Evaluations  
+**GET** `/api/student-evaluation/`  
+**Authorization:** Bearer Token  
+**Role:** Staff or Admin
+
+#### Responses
+- `200 OK` – Returns a list of all student evaluations.
+- `403 Forbidden` – Insufficient role.
+- `500 Internal Server Error`
+
+---
+
 ## Data Structures
 
 ### User Model
