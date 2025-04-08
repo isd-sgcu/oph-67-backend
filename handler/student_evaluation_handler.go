@@ -63,7 +63,7 @@ func (h *StudentEvaluationHandler) CreateStudentEvaluation(c *fiber.Ctx) error {
 
 // GetStudentEvaluationByStudentId retrieves a student evaluation by student ID.
 func (h *StudentEvaluationHandler) GetStudentEvaluationByStudentId(c *fiber.Ctx) error {
-	studentId := c.Params("student_id")
+	studentId := c.Params("id")
 	if studentId == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Student ID is required"})
 	}
@@ -87,7 +87,7 @@ func (h *StudentEvaluationHandler) GetAllStudentEvaluations(c *fiber.Ctx) error 
 
 // UpdateStudentEvaluation updates an existing student evaluation.
 func (h *StudentEvaluationHandler) UpdateStudentEvaluation(c *fiber.Ctx) error {
-	studentId := c.Params("student_id")
+	studentId := c.Params("id")
 	if studentId == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Student ID is required"})
 	}
@@ -109,7 +109,7 @@ func (h *StudentEvaluationHandler) UpdateStudentEvaluation(c *fiber.Ctx) error {
 
 // DeleteStudentEvaluation deletes a student evaluation by student ID.
 func (h *StudentEvaluationHandler) DeleteStudentEvaluation(c *fiber.Ctx) error {
-	studentId := c.Params("student_id")
+	studentId := c.Params("id")
 	if studentId == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Student ID is required"})
 	}
