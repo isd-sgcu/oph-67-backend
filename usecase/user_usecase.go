@@ -233,6 +233,24 @@ func (u *UserUsecase) GetQRURL(id string) (string, error) {
 	return fmt.Sprintf("%s/api/users/qr/%s", baseURL, user.ID), nil
 }
 
+// GetCertToken generates a certificate token for a user based on their name.
+// Returns the token or error if user lookup fails or token generation fails.
+func (u *UserUsecase) GetCertToken(id string) (string, error) {
+	user, err := u.GetById(id)
+	if err != nil {
+		return "", err
+	}
+
+	privatekey := utils.GetEnv("CERT_PRIVATE_KEY", "")
+
+	token, err := utils.GenerateED25519Signature(privatekey, user.Name)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
 // RemoveStaff removes a user from the system by their ID.
 // Returns error if repository operation fails.
 func (u *UserUsecase) RemoveStaff(id string) error {

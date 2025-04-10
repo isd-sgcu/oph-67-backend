@@ -15,12 +15,13 @@ import (
 
 // UserHandler represents the handler for user-related endpoints
 type UserHandler struct {
-	Usecase *usecase.UserUsecase
+	Usecase           *usecase.UserUsecase
+	EvaluationUsecase *usecase.StudentEvaluationUsecase
 }
 
 // NewUserHandler creates a new UserHandler
-func NewUserHandler(usecase *usecase.UserUsecase) *UserHandler {
-	return &UserHandler{Usecase: usecase}
+func NewUserHandler(usecase *usecase.UserUsecase, evalUsecase *usecase.StudentEvaluationUsecase) *UserHandler {
+	return &UserHandler{Usecase: usecase, EvaluationUsecase: evalUsecase}
 }
 
 // Register Staff godoc
@@ -427,6 +428,30 @@ func (h *UserHandler) GetQRURL(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(domain.ErrorResponse{Error: "User not found"})
 	}
 	return c.Status(fiber.StatusOK).JSON(domain.QrResponse{QrURL: qrURL})
+}
+
+// GetCertToken godoc
+// @Summary Get Cert Token
+// @Description Retrieve a cert token for a user
+// @Produce  json
+// @security BearerAuth
+// @Param id path string true "User ID"
+// @Success 200 {object} domain.CertTokenResponse
+// @Failure 404 {object} domain.ErrorResponse "Evaluation data not found"
+// @Failure 500 {object} domain.ErrorResponse "Failed to get cert token"
+// @Router /api/users/certToken/{id} [get]
+func (h *UserHandler) GetCertToken(c *fiber.Ctx) error {
+	id := c.Params("id")
+	// check if user did evaluation form
+	_, err := h.EvaluationUsecase.GetStudentEvaluationByStudentId(id)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(domain.ErrorResponse{Error: "Evaluation data not found"})
+	}
+	certToken, err := h.Usecase.GetCertToken(id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(domain.ErrorResponse{Error: "Failed to get cert token"})
+	}
+	return c.Status(fiber.StatusOK).JSON(domain.CertTokenResponse{UserID: id, CertToken: certToken})
 }
 
 // RemoveStaff godoc

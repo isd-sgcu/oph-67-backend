@@ -9,8 +9,8 @@ import (
 )
 
 // RegisterUserRoutes sets up all user-related endpoints with appropriate middleware and grouping
-func RegisterUserRoutes(app *fiber.App, userUsecase *usecase.UserUsecase) {
-	userHandler := handler.NewUserHandler(userUsecase)
+func RegisterUserRoutes(app *fiber.App, userUsecase *usecase.UserUsecase, studentEvaluationUsecase *usecase.StudentEvaluationUsecase) {
+	userHandler := handler.NewUserHandler(userUsecase, studentEvaluationUsecase)
 
 	api := app.Group("/api")
 
@@ -21,9 +21,10 @@ func RegisterUserRoutes(app *fiber.App, userUsecase *usecase.UserUsecase) {
 
 	// Authenticated user routes - Requires valid JWT
 	authenticated := api.Group("/users", middleware.AuthMiddleware(userUsecase))
-	authenticated.Get("/:id", userHandler.GetById)     // Get user by ID (self)
-	authenticated.Patch("/:id", userHandler.Update)    // Update own account info
-	authenticated.Get("/qr/:id", userHandler.GetQRURL) // Get user's QR code URL
+	authenticated.Get("/:id", userHandler.GetById)                // Get user by ID (self)
+	authenticated.Patch("/:id", userHandler.Update)               // Update own account info
+	authenticated.Get("/qr/:id", userHandler.GetQRURL)            // Get user's QR code URL
+	authenticated.Get("/certToken/:id", userHandler.GetCertToken) // Get user's certificate token
 
 	// Staff/Admin routes - Requires Staff or Admin role
 	staffAdmin := api.Group("/users", middleware.RoleMiddleware(userUsecase, domain.Staff, domain.Admin))

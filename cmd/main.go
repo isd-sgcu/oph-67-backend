@@ -52,7 +52,7 @@ func main() {
 	studentEvaluationUsecase := usecase.NewStudentEvaluationUsecase(studentEvaluationRepo)
 
 	// Register routes
-	routes.RegisterUserRoutes(app, userUsecase) // Register the user routes
+	routes.RegisterUserRoutes(app, userUsecase, studentEvaluationUsecase) // Register the user routes
 	routes.RegisterDashboardRoutes(app, dashBoardUssecase)
 	routes.RegisterStudentEvaluationRoutes(app, studentEvaluationUsecase, userUsecase)
 
