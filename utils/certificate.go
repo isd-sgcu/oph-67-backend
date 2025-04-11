@@ -3,18 +3,24 @@ package utils
 import (
 	"crypto/ed25519"
 	"encoding/base64"
+	"errors"
 )
 
-// GenerateED25519Signature generates an ED25519 signature for a given message using the provided private key.
+// CreateToken creates a token(URLsafe) using the provided message and private key
 func GenerateED25519Signature(privateKey string, message string) (string, error) {
-	priavteKeyBytes, err := base64.StdEncoding.DecodeString(privateKey)
+	priavteKeyBytes, err := base64.RawURLEncoding.DecodeString(privateKey)
 	if err != nil {
 		return "", err
 	}
 	if len(priavteKeyBytes) != ed25519.PrivateKeySize {
-		return "", err
+		return "", errors.New("invalid private key size")
 	}
 
 	signature := ed25519.Sign(priavteKeyBytes, []byte(message))
-	return base64.StdEncoding.EncodeToString(signature), nil
+	encodedMessage := base64.RawURLEncoding.EncodeToString([]byte(message))
+
+	// Combine the encoded message and signature
+	token := encodedMessage + "." + base64.RawURLEncoding.EncodeToString(signature)
+
+	return token, nil
 }
