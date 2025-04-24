@@ -1,0 +1,113 @@
+<!-- cert_template.html -->
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1024px, initial-scale=1.0">
+    <style>
+        /* css vars not working !!!!!! */
+        /* :root {
+            --page-width: 1402px;
+            --page-height: 991px;
+            --name-font-size: 32pt;
+        } */
+
+        * {
+            padding: 0 0;
+            margin: 0 0;
+            box-sizing: border-box;
+        }
+
+        @font-face {
+            font-family: 'THSarabun';
+            src: url('./THSarabunNew.ttf') format('truetype');
+        }
+
+        body {
+            position: relative;
+            font-family: 'THSarabun', sans-serif;
+            background-size: cover;
+            background-image: url('./template.png');
+            background-repeat: no-repeat;
+            /* aspect-ratio: 6250/4419; */
+            width: 1402px;
+            /* idk why it need to be 991px & also I don't care la */
+            height: 991px;
+        }
+
+        .cert-name {
+            position: absolute;
+
+            font-size: 42pt;
+            width: fit-content;
+            text-align: center;
+            text-wrap: nowrap;
+        }
+
+        .token {
+            font-size: 8pt;
+            position: absolute;
+            bottom: 12px;
+            right: 20px;
+        }
+
+        .container {
+            width: 1402px;
+            height: 991px;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            justify-items: center;
+        }
+    </style>
+    <script>
+        var fontSize = 100;
+
+        // center div using css not working
+        function centerDiv() {
+            var usernameDiv = document.getElementById('username');
+            var containerDiv = document.querySelector('.container');
+            var containerWidth = containerDiv.offsetWidth;
+            var containerHeight = containerDiv.offsetHeight;
+
+            // while width of usernameDiv is greater than 1000px
+            if (usernameDiv.offsetWidth > containerWidth) {
+                usernameDiv.style.fontSize = --fontSize + 'px';
+                centerDiv();
+                return;
+            }
+
+            var usernameWidth = usernameDiv.offsetWidth;
+            var usernameHeight = usernameDiv.offsetHeight;
+            var left = (containerWidth - usernameWidth) / 2;
+            var top = (containerHeight - usernameHeight) / 2;
+            usernameDiv.style.left = left + 'px';
+            usernameDiv.style.top = top + 'px';
+            usernameDiv.style.width = usernameWidth + 'px';
+            usernameDiv.style.height = usernameHeight + 'px';
+        }
+        // Call the function when the page loads
+        window.onload = function () {
+            centerDiv();
+        }
+
+        // Call the function when the window is resized
+        window.onresize = function () {
+            centerDiv();
+        }
+    </script>
+</head>
+
+<body>
+    <div class='container'>
+        <div id='username' class="cert-name">
+            {{ .UserName}}
+        </div>
+    </div>
+    <div class="token">ID: {{.Token}}
+    </div>
+</body>
+
+</html>
