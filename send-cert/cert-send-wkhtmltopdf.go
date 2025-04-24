@@ -9,7 +9,10 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"io/ioutil"
 	"log"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -36,6 +39,8 @@ const (
 	sendGridAPIKEY = "<SendGrid API KEY>"
 	// CertPrivateKey
 	certPrivateKey = "<CertPrivateKey>" // base64 encoded private key
+	// config
+	isWkhtmltopdf = false
 )
 
 type CertData struct {
@@ -121,7 +126,7 @@ func loadCSV(filePath string) ([]User, error) {
 		if i == 0 { // skip header
 			continue
 		}
-		if len(row) < 6 {
+		if len(row) < 9 {
 			// if len(row) < 6 {
 			continue
 		}
@@ -153,71 +158,86 @@ func processUser(user User) error {
 
 	token = userName + "." + token
 
-	data := CertData{
-		UserName: user.Name,
-		Token:    token,
-	}
+	var fontPath, imgPath, outputPDF string
 
-	// Generate HTML
-	f := filepath.Join(Getwd(), htmlTemplatePath)
-	tmpl, err := template.ParseFiles(f)
-	if err != nil {
-		return fmt.Errorf("parse HTML template: %w", err)
-	}
-
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, data); err != nil {
-		return fmt.Errorf("execute template: %w", err)
-	}
-
-	// Write HTML file
-	htmlFile := "temp_" + user.Email + ".html"
-	htmlFile = filepath.Join(Getwd(), htmlFile)
-	if err := os.WriteFile(htmlFile, buf.Bytes(), 0644); err != nil {
-		return fmt.Errorf("write HTML: %w", err)
-	}
-
-	f = filepath.Join(Getwd(), fontFilePath)
-	fontPath, _ := filepath.Abs(f)
-
-	f = filepath.Join(Getwd(), imgFilePath)
-	imgPath, _ := filepath.Abs(f)
-
-	outputPDF := "cert_" + user.Email + ".pdf"
+	outputPDF = "cert_" + user.Email + ".pdf"
 	outputPDF = filepath.Join(Getwd(), outputPDF)
 
-	cmd := exec.Command("wkhtmltopdf.exe",
-		"--no-pdf-compression",
-		"--margin-bottom", "0",
-		"--margin-left", "0",
-		"--margin-right", "0",
-		"--margin-top", "0",
-		"--orientation", "Landscape",
-		"--page-size", "A4",
-		"--allow", fontPath,
-		"--allow", imgPath,
-		// silence the console output
-		// "--quiet",
-		htmlFile,
-		outputPDF,
-	)
+	if isWkhtmltopdf {
+		data := CertData{
+			UserName: user.Name,
+			Token:    token,
+		}
 
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("generate PDF: %w", err)
+		// Generate HTML
+		f := filepath.Join(Getwd(), htmlTemplatePath)
+		tmpl, err := template.ParseFiles(f)
+		if err != nil {
+			return fmt.Errorf("parse HTML template: %w", err)
+		}
+
+		var buf bytes.Buffer
+		if err := tmpl.Execute(&buf, data); err != nil {
+			return fmt.Errorf("execute template: %w", err)
+		}
+
+		// Write HTML file
+		htmlFile := "temp_" + user.Email + ".html"
+		htmlFile = filepath.Join(Getwd(), htmlFile)
+		if err := os.WriteFile(htmlFile, buf.Bytes(), 0644); err != nil {
+			return fmt.Errorf("write HTML: %w", err)
+		}
+
+		f = filepath.Join(Getwd(), fontFilePath)
+		fontPath, _ = filepath.Abs(f)
+
+		f = filepath.Join(Getwd(), imgFilePath)
+		imgPath, _ = filepath.Abs(f)
+
+		cmd := exec.Command("wkhtmltopdf.exe",
+			"--no-pdf-compression",
+			"--margin-bottom", "0",
+			"--margin-left", "0",
+			"--margin-right", "0",
+			"--margin-top", "0",
+			"--orientation", "Landscape",
+			"--page-size", "A4",
+			"--allow", fontPath,
+			"--allow", imgPath,
+			// silence the console output
+			"--quiet",
+			htmlFile,
+			outputPDF,
+		)
+
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("generate PDF: %w", err)
+		}
+
+		// Cleanup
+		defer func() {
+			_ = os.Remove(htmlFile)
+			_ = os.Remove(outputPDF)
+		}()
+	} else {
+		err = fetchCertificatePDF(user.Name, token, outputPDF)
+		if err != nil {
+			return fmt.Errorf("fetch PDF: %w", err)
+		}
+
+		// Cleanup
+		defer func() {
+			_ = os.Remove(outputPDF)
+		}()
 	}
-
 	log.Println("✅ Certificate created:", outputPDF)
 
 	// Send email
 	if err := sendEmail(user.Email, user.Name, outputPDF); err != nil {
 		return fmt.Errorf("send email: %w", err)
 	}
-
-	// Cleanup
-	_ = os.Remove(htmlFile)
-	_ = os.Remove(outputPDF)
 
 	return nil
 }
@@ -351,4 +371,39 @@ func Getwd() string {
 		panic(err)
 	}
 	return dir
+}
+
+func fetchCertificatePDF(userName, token, outputPDF string) error {
+	url := "http://localhost:3000/api/generate-pdf" // works on local but not test on prod yet. so I'll hardcode it for now
+
+	// format url to URL-encoded
+	userName = ToURLSafe(userName)
+	token = ToURLSafe(token)
+
+	resp, err := http.Get(fmt.Sprintf("%s?userName=%s&token=%s", url, userName, token))
+	if err != nil {
+		return fmt.Errorf("request to PDF service failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		resBody, _ := ioutil.ReadAll(resp.Body)
+		return fmt.Errorf("bad response: %s", resBody)
+	}
+
+	pdfBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("read PDF response: %w", err)
+	}
+
+	if err := os.WriteFile(outputPDF, pdfBytes, 0644); err != nil {
+		return fmt.Errorf("save PDF file: %w", err)
+	}
+
+	log.Println("✅ Certificate fetched and saved:", outputPDF)
+	return nil
+}
+
+func ToURLSafe(s string) string {
+	return url.QueryEscape(s)
 }
